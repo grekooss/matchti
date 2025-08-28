@@ -1,10 +1,10 @@
 import "../../global.css";
 import React, { useState } from "react";
 import { View } from "react-native";
-import Map from "@/components/maps/Map";
+import FallbackMap from "@/components/maps/FallbackMap";
 import type { Marker, MapBounds } from "@/lib/types/map";
- 
-// Przykładowe markery kortów tenisowych w Krakowie
+
+// Przykładowe markery obiektów sportowych w Krakowie
 const sampleMarkers: Marker[] = [
   {
     id: "1",
@@ -23,10 +23,22 @@ const sampleMarkers: Marker[] = [
     position: [50.0495, 19.9441], // Kazimierz
     title: "Klub tenisowy Kazimierz",
     icon: "tennisball-outline"
+  },
+  {
+    id: "4",
+    position: [50.0619, 19.9368], // Nowa Huta
+    title: "Basen Kryty",
+    icon: "fitness-outline"
+  },
+  {
+    id: "5",
+    position: [50.0501, 19.9441], // Podgórze
+    title: "Hala Sportowa",
+    icon: "basketball-outline"
   }
 ];
 
-export default function HomeScreen() {
+export default function SearchScreen() {
   const [mapState, setMapState] = useState({
     center: [50.0647, 19.9450] as [number, number],
     zoom: 12
@@ -34,7 +46,7 @@ export default function HomeScreen() {
 
   const handleBoundsChange = (bounds: MapBounds) => {
     console.log('Map bounds changed:', bounds);
-    // Tu można dodać logikę ładowania markerów w nowych granicach
+    // Tu można dodać logikę ładowania obiektów w nowych granicach
   };
 
   const handleMapStateChange = (state: any) => {
@@ -44,12 +56,12 @@ export default function HomeScreen() {
 
   const handleMarkerPress = (marker: Marker) => {
     console.log('Marker pressed:', marker);
-    // Tu można dodać logikę pokazywania szczegółów kortu
+    // Tu można dodać logikę pokazywania szczegółów obiektu sportowego
   };
 
   return (
     <View className="flex-1 bg-background">
-      <Map
+      <FallbackMap
         markers={sampleMarkers}
         onBoundsChange={handleBoundsChange}
         onMapStateChange={handleMapStateChange}

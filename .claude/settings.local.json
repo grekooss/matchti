@@ -35,7 +35,12 @@
       "Bash(npm start)",
       "Bash(npx eas build:*)",
       "Read(C:\\Projekty/**)",
-      "Read(C:\\Projekty\\matchti/**)"
+      "Read(C:\\Projekty\\matchti/**)",
+      "Bash(dir \"app\\(tabs)\")",
+      "Bash(dir componentsmaps)",
+      "Bash(dir:*)",
+      "Bash(timeout:*)",
+      "Bash(npx react-native start:*)"
     ],
     "deny": []
   },
