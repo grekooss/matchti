@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   width="24"
+   height="24"
+   viewBox="0 0 24 24"
+   fill="none"
+   version="1.1"
+   id="svg1"
+   sodipodi:docname="chess.svg"
+   inkscape:version="1.4.2 (f4327f4, 2025-05-13)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview1"
+     pagecolor="#ffffff"
+     bordercolor="#000000"
+     borderopacity="0.25"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     showgrid="false"
+     inkscape:zoom="8"
+     inkscape:cx="-24.9375"
+     inkscape:cy="-23.4375"
+     inkscape:window-width="2560"
+     inkscape:window-height="1377"
+     inkscape:window-x="1912"
+     inkscape:window-y="-8"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="svg1" />
+  <defs
+     id="defs1">
+    <clipPath
+       id="clip0_18071_1649">
+      <rect
+         width="24"
+         height="24"
+         fill="white"
+         id="rect1" />
+    </clipPath>
+  </defs>
+  <g
+     transform="matrix(0.01055764,0,0,-0.01055764,-2.8334842,28.396035)"
+     fill="#000000"
+     stroke="none"
+     id="g2">
+    <path
+       d="m 1800,2544 c -103,-8 -119,-25 -120,-129 0,-131 -115,-112 -124,20 l -6,95 -145,6 -145,6 v -101 c 0,-98 -2,-101 -58,-101 -61,0 -81,35 -82,145 0,54 -2,55 -122,55 H 876 l 11,-75 c 6,-41 17,-149 24,-240 12,-144 18,-165 51,-165 29,0 38,-14 38,-60 0,-46 13,-67 53,-85 l 53,-24 -13,-331 C 1077,1179 1049,1041 981,1007 924,978 901,943 900,886 900,857 879,830 841,810 767,772 740,724 740,631 v -72 l 665,6 665,5 -2,75 c -3,81 -49,149 -122,176 -30,12 -45,37 -50,83 -4,48 -20,73 -60,92 -81,38 -100,130 -111,537 -9,354 -8,364 33,386 28,15 42,42 42,82 0,45 9,59 38,59 43,0 53,39 73,302 15,192 15,191 -111,182 z m -727,-159 17,-95 h 110 110 l 6,95 6,95 h 89 89 v -100 -100 h 109 110 l 13,100 c 12,94 17,100 70,100 h 57 l -11,-155 c -6,-85 -15,-166 -19,-180 -6,-19 -109,-25 -428,-25 H 980 l -1,45 c -1,25 -8,106 -16,180 l -15,135 h 54 c 48,0 55,-9 71,-95 z m 667,-375 c 0,-50 -1,-50 -180,-50 -147,0 -474.8766,1.2511 -474.8766,-22.7489 0,-24 323.8766,-37.2511 434.8766,-37.2511 h 140 l 1,-315 c 1,-291 9,-384 49,-530 l 14,-55 h -322 c -177,0 -322,2 -322,5 0,3 15,50 32,105 21,66 35,217 43,446 6,190 9.3319,340.3319 18.3319,346.3319 355.6298,-2.5872 21.6681,55.2511 -43.3319,55.2511 -61,0 -70,8.417 -70,52.417 v 50 h 340 340 z M 1840,890 v -50 h -440 c -413,0 -440,2 -440,37 0,61 13,63 453,63 h 427 z m 116,-145 c 22,-19 46,-55 54,-80 l 13,-45 h -612 c -669,0 -673,1 -568,114 60,63 1041,73 1113,11 z"
+       id="path1-3"
+       sodipodi:nodetypes="ccccccsscscccssccccccscccccccccsscccccccccccccccscccsccccscssssccccsscccsscccsccssscccccscc" />
+  </g>
+</svg>

@@ -40,7 +40,8 @@
       "Bash(dir componentsmaps)",
       "Bash(dir:*)",
       "Bash(timeout:*)",
-      "Bash(npx react-native start:*)"
+      "Bash(npx react-native start:*)",
+      "Bash(npx react-native:*)"
     ],
     "deny": []
   },

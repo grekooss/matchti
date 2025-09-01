@@ -1,10 +1,9 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { ActivityIndicator, ScrollView, Text, View } from 'react-native';
+import { ActivityIndicator, ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Sport, useSportsQuery } from '../lib/react-query/useSportsQuery';
 import { useCategoryStore } from '../lib/zustand/categoryStore';
 import { useBottomSheetStore } from '../lib/zustand/bottomSheetStore';
-import { NeumorphicButton } from './ui/NeumorphicButton';
 
 // Importy ikon SVG (bez zmian)
 import AirsoftIcon from '../assets/icons/categories/airsoft.svg';
@@ -93,7 +92,8 @@ import VolleyballIcon from '../assets/icons/categories/volleyball.svg';
 import WeightliftingIcon from '../assets/icons/categories/weightlifting.svg';
 import YogaIcon from '../assets/icons/categories/yoga.svg';
 
-const iconMap: Record<string, React.FC<React.SVGProps<SVGSVGElement>>> = {
+
+const iconMap: Record<string, React.FC<any>> = {
   playing_baseball: PlayingBaseballIcon,
   playing_board_games: PlayingBoardGamesIcon,
   playing_basketball: PlayingBasketballIcon,
@@ -181,6 +181,99 @@ const iconMap: Record<string, React.FC<React.SVGProps<SVGSVGElement>>> = {
   golf: GolfIcon,
 };
 
+
+/**
+ * ===============================================================================
+ * PARAMETRY WIZUALNE I KONFIGURACYJNE EXPLOREHEADER - PEŁNY PRZEWODNIK
+ * ===============================================================================
+ * 
+ * 🎨 Ten komponent zawiera liczne parametry wizualne oznaczone symbolem 🎨 PARAMETR
+ * 
+ * GŁÓWNE KATEGORIE PARAMETRÓW:
+ * 
+ * 1. POZYCJONOWANIE I LAYOUT:
+ *    - Pozycja komponenta (absolute, z-index: 50)
+ *    - Marginesy zewnętrzne (mx-4 = 16px poziomo, mt-2 = 8px góra)
+ *    - Wysokość ScrollView (h-[80px] = 80px)
+ * 
+ * 2. TŁO I CIEŃ GŁÓWNEGO KONTENERA:
+ *    - Kolor tła: bg-white
+ *    - Zaokrąglenie: borderRadius: 50 (pełne półkola)
+ *    - Kolor cienia: shadowColor: '#000'
+ *    - Pozycja cienia: shadowOffset: {width: 0, height: 4}
+ *    - Przezroczystość cienia: shadowOpacity: 0.1
+ *    - Rozmycie cienia: shadowRadius: 12
+ *    - Wysokość cienia Android: elevation: 8
+ * 
+ * 3. SCROLL VIEW (główne kategorie i podkategorie):
+ *    - Padding zawartości: paddingLeft/Right: 16px, paddingVertical: 8px
+ *    - Odstępy między elementami: gap: 12px
+ *    - Wskaźnik przewijania: showsHorizontalScrollIndicator: false
+ *    - Częstotliwość zdarzeń scroll: scrollEventThrottle: 16ms
+ * 
+ * 4. POJEDYNCZY ELEMENT KATEGORII:
+ *    - Szerokość elementu: width: 80px
+ *    - Padding przycisku: paddingHorizontal: 4px, paddingVertical: 2px
+ *    - Przezroczystość po naciśnięciu: activeOpacity: 0.7
+ * 
+ * 5. IKONA KATEGORII:
+ *    - Rozmiar ikony SVG: width: 24px, height: 24px
+ *    - Kolor tła aktywnej kategorii: backgroundColor: '#069494'
+ *    - Zaokrąglenie tła aktywnej: borderRadius: 50
+ *    - Padding kontenera ikony: paddingHorizontal: 8px, paddingVertical: 4px
+ *    - Minimalne wymiary kontenera: minWidth: 40px, minHeight: 40px
+ * 
+ * 6. TEKST KATEGORII:
+ *    - Rozmiar czcionki: text-[11px] (11px)
+ *    - Maksymalna liczba linii: numberOfLines: 2
+ *    - Wysokość linii: lineHeight: 14px
+ *    - Szerokość obszaru tekstu: width: 72px
+ *    - Kolor tekstu aktywnej: text-white
+ *    - Kolor tekstu nieaktywnej: text-primary
+ *    - Sposób skracania: ellipsizeMode: 'tail'
+ * 
+ * 7. FALLBACK IKONY:
+ *    - Rozmiar fallback ikony: width: 24px, height: 24px
+ *    - Kolor fallback (aktywna): backgroundColor: '#FFFFFF'
+ *    - Kolor fallback (nieaktywna): backgroundColor: '#069494'
+ *    - Zaokrąglenie fallback: borderRadius: 4px
+ * 
+ * 8. STANY LOADING I ERROR:
+ *    - Wysokość kontenera loading/error: h-20 (80px)
+ *    - Rozmiar spinnera: size: 'large'
+ *    - Kolor spinnera: color: '#0000ff'
+ *    - Kolor tekstu błędu: text-red-500
+ *    - Padding kontenera błędu: px-5 (20px poziomo)
+ * 
+ * 9. KOMUNIKATY:
+ *    - Rozmiar tekstu komunikatu: text-sm
+ *    - Kolor tekstu komunikatu: text-gray-500
+ *    - Padding komunikatu: px-4 (16px poziomo)
+ * 
+ * 10. PORZĄDEK WYŚWIETLANIA:
+ *     - Kolejność podkategorii: .reverse() (odwrócona)
+ * 
+ * KOLORY UŻYTE W KOMPONENCIE:
+ * - Główny kolor aplikacji (aktywna kategoria): #069494
+ * - Tło głównego kontenera: white
+ * - Cień: #000 (opacity: 0.1)
+ * - Tekst aktywnej kategorii: white
+ * - Tekst nieaktywnej kategorii: text-primary (z Tailwind)
+ * - Tekst błędu: red-500 (z Tailwind)
+ * - Tekst komunikatu: gray-500 (z Tailwind)
+ * - Spinner: #0000ff
+ * 
+ * WYMIARY KLUCZOWE:
+ * - Wysokość komponenta: 80px
+ * - Szerokość elementu kategorii: 80px
+ * - Szerokość ikony: 24px × 24px
+ * - Minimalna wielkość kontenera ikony aktywnej: 40px × 40px
+ * - Szerokość obszaru tekstu: 72px
+ * - Odstępy między elementami: 12px
+ * - Padding ScrollView: 16px (lewy/prawy), 8px (górny/dolny)
+ * 
+ * ===============================================================================
+ */
 const ExploreHeader = () => {
   const { data: sports, isLoading, error } = useSportsQuery();
   const { activeCategory, setActiveCategory } = useCategoryStore();
@@ -245,7 +338,7 @@ const ExploreHeader = () => {
       // Odkliknięcie głównej kategorii (jeśli nie ma wybranej podkategorii)
       setSelectedMainCategory(undefined);
       setSelectedSubCategory(undefined);
-      setActiveCategory(undefined); // Aktualizacja globalnego stanu
+      setActiveCategory(null); // Aktualizacja globalnego stanu
     } else {
       // Wybór nowej głównej kategorii lub kliknięcie na już wybraną (gdy jest podkategoria)
       setSelectedMainCategory(category);
@@ -261,12 +354,10 @@ const ExploreHeader = () => {
     }
     
     if (selectedSubCategory?.id === subCategory.id) {
-      // Odkliknięcie podkategorii
+      // Odkliknięcie podkategorii - przejście do widoku kategorii głównych
       setSelectedSubCategory(undefined);
-      // Globalny stan powinien odzwierciedlać główną kategorię, jeśli podkategoria jest odznaczona
-      if (selectedMainCategory) {
-        setActiveCategory(selectedMainCategory.id);
-      }
+      setSelectedMainCategory(undefined);
+      setActiveCategory(null); // Wyczyść wszystkie wybory i wróć do głównych kategorii
     } else {
       // Wybór nowej podkategorii
       setSelectedSubCategory(subCategory);
@@ -290,39 +381,107 @@ const ExploreHeader = () => {
       // Jeśli nie ma wybranej podkategorii, wyczyść wszystkie wybory
       setSelectedMainCategory(undefined);
       setSelectedSubCategory(undefined);
-      setActiveCategory(undefined); // Aktualizacja globalnego stanu
+      setActiveCategory(null); // Aktualizacja globalnego stanu
     }
   };
 
+  // ===== FUNKCJA RENDEROWANIA POJEDYNCZEJ KATEGORII =====
   const renderCategoryItem = (
     item: Sport,
     onPress: () => void,
     isActive: boolean
   ) => {
     const IconComponent = iconMap[item.iconName] || iconMap['simple_square'];
-    const iconElement = <IconComponent />;
-
+    
+    // Sprawdź czy IconComponent to rzeczywiście funkcja/komponent
+    const isValidComponent = IconComponent && typeof IconComponent === 'function';
+    
     return (
-      <View key={item.id} style={{ minWidth: 78, alignItems: 'center' }}>
-        <NeumorphicButton
+      <View 
+        key={item.id} 
+        style={{ 
+          width: 80, // 🎨 PARAMETR: Szerokość pojedynczego elementu kategorii
+          alignItems: 'center', 
+          overflow: 'hidden' 
+        }}
+      >
+        <TouchableOpacity
           onPress={onPress}
-          text={item.name}
-          icon={iconElement}
-          outerColors={isActive ? ['#99A0A966', '#FFFFFF66'] : undefined}
-          middleColors={isActive ? ['#D99AFA', '#BA3D4F'] : undefined}
-          innerColors={isActive ? ['#D99AFA', '#BA3D4F'] : undefined}
-          textColor={isActive ? 'black' : 'black'}
-          iconColor={isActive ? 'white' : '#71717a'}
-        />
+          style={isActive ? {
+            alignItems: 'center',
+            justifyContent: 'center',
+            backgroundColor: '#069494', // 🎨 PARAMETR: Kolor tła aktywnej kategorii obejmujący ikonę i tekst
+            borderRadius: 20,           // 🎨 PARAMETR: Zaokrąglenie tła aktywnej kategorii
+            paddingHorizontal: 8,       // 🎨 PARAMETR: Padding poziomy całego przycisku (aktywna)
+            paddingVertical: 8,         // 🎨 PARAMETR: Padding pionowy całego przycisku (aktywna)
+            width: 72,                  // 🎨 PARAMETR: Szerokość przycisku aktywnej kategorii
+            maxHeight: 50,              // 🎨 PARAMETR: Minimalna wysokość przycisku aktywnej kategorii
+          } : {
+            alignItems: 'center',
+            justifyContent: 'center',
+            paddingHorizontal: 8,       // 🎨 PARAMETR: Padding poziomy całego przycisku (nieaktywna)
+            paddingVertical: 8,         // 🎨 PARAMETR: Padding pionowy całego przycisku (nieaktywna)
+            width: 72,                  // 🎨 PARAMETR: Szerokość przycisku nieaktywnej kategorii
+            maxHeight: 50,              // 🎨 PARAMETR: Minimalna wysokość przycisku nieaktywnej kategorii
+          }}
+          activeOpacity={0.7} // 🎨 PARAMETR: Przezroczystość po naciśnięciu (0.0-1.0)
+        >
+          <View 
+            style={{
+              alignItems: 'center',
+              justifyContent: 'center',
+              marginBottom: 4,            // 🎨 PARAMETR: Odstęp między ikoną a tekstem
+            }}
+          >
+            {isValidComponent ? (
+              <IconComponent 
+                width={24}  // 🎨 PARAMETR: Szerokość ikony SVG
+                height={24} // 🎨 PARAMETR: Wysokość ikony SVG
+                stroke={isActive ? '#FFFFFF' : '#000000'} // 🎨 PARAMETR: Kolor stroke ikony (aktywna biała/nieaktywna czarna)
+                color={isActive ? '#FFFFFF' : '#000000'} // 🎨 PARAMETR: Kolor ikony (aktywna biała/nieaktywna czarna)
+              />
+            ) : (
+              // Fallback dla brakujących ikon
+              <View 
+                style={{
+                  width: 24,  // 🎨 PARAMETR: Szerokość fallback ikony
+                  height: 24, // 🎨 PARAMETR: Wysokość fallback ikony
+                  backgroundColor: isActive ? '#FFFFFF' : '#000000', // 🎨 PARAMETR: Kolor fallback ikony (aktywna biała/nieaktywna czarna)
+                  borderRadius: 4, // 🎨 PARAMETR: Zaokrąglenie fallback ikony
+                }} 
+              />
+            )}
+          </View>
+          <Text 
+            className={`text-[10px] font-medium text-center ${
+              isActive ? 'text-white' : 'text-black' // 🎨 PARAMETR: Kolor tekstu (aktywna biała/nieaktywna czarna)
+            }`}
+            numberOfLines={1}     // 🎨 PARAMETR: Maksymalna liczba linii tekstu
+            ellipsizeMode="tail"  // 🎨 PARAMETR: Sposób skracania tekstu ('tail', 'head', 'middle')
+            style={{ 
+              textAlign: 'center',
+              flexShrink: 0,
+              lineHeight: 12,     // 🎨 PARAMETR: Wysokość linii tekstu
+            }}
+          >
+            {item.name}
+          </Text>
+        </TouchableOpacity>
       </View>
     );
   };
 
+  // ===== STANY LOADING I ERROR =====
   if (isLoading) {
     return (
       <SafeAreaView edges={['top']} className="">
-        <View className="h-20 items-center justify-center">
-          <ActivityIndicator size="large" color="#0000ff" />
+        <View 
+          className="h-20 items-center justify-center" // 🎨 PARAMETR: Wysokość kontenera podczas ładowania
+        >
+          <ActivityIndicator 
+            size="large"      // 🎨 PARAMETR: Rozmiar spinnera ('small', 'large')
+            color="#0000ff"   // 🎨 PARAMETR: Kolor spinnera
+          />
         </View>
       </SafeAreaView>
     );
@@ -331,8 +490,12 @@ const ExploreHeader = () => {
   if (error) {
     return (
       <SafeAreaView edges={['top']} className="">
-        <View className="h-20 items-center justify-center px-5">
-          <Text className="text-center text-red-500">
+        <View 
+          className="h-20 items-center justify-center px-5" // 🎨 PARAMETR: Wysokość i padding kontenera błędu
+        >
+          <Text 
+            className="text-center text-red-500" // 🎨 PARAMETR: Kolor tekstu błędu
+          >
             Wystąpił błąd podczas ładowania kategorii: {error.message}
           </Text>
         </View>
@@ -340,81 +503,155 @@ const ExploreHeader = () => {
     );
   }
 
+  // ===== GŁÓWNY RENDER KOMPONENTU =====
   return (
-    <SafeAreaView edges={['top']} className="pb-2">
-      {!selectedMainCategory ? (
-        // Widok głównych kategorii
-        <ScrollView
-          className="h-[84px]"
-          ref={mainCategoriesScrollViewRef}
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          onScroll={(event) => {
-            mainCategoryScrollPosition.current =
-              event.nativeEvent.contentOffset.x;
-          }}
-          scrollEventThrottle={16} // Optymalizacja dla onScroll
-          contentContainerStyle={{
-            paddingLeft: 10,
-            paddingRight: 10,
-            gap: 12,
-            paddingVertical: 0, // Usunięty padding pionowy dla lepszego dopasowania
-            alignItems: 'flex-end', // Wyrównanie elementów do dołu
+    <View 
+      className="absolute top-0 left-0 right-0 z-50" // 🎨 PARAMETR: Pozycjonowanie (absolute) i z-index
+    >
+      <SafeAreaView 
+        edges={['top']} 
+        className="mx-3 mt-1" // 🎨 PARAMETR: Margines poziomy
+      >
+        <View 
+          className="bg-white shadow-lg" // 🎨 PARAMETR: Kolor tła i intensywność cienia
+          style={{
+            borderRadius: 20,           // 🎨 PARAMETR: Zaokrąglenie głównego kontenera (50 = pełne półkola)
+            shadowColor: '#000',        // 🎨 PARAMETR: Kolor cienia
+            shadowOffset: { width: 0, height: 4 }, // 🎨 PARAMETR: Przesunięcie cienia (x, y)
+            shadowOpacity: 0.1,         // 🎨 PARAMETR: Przezroczystość cienia (0.0-1.0)
+            shadowRadius: 12,           // 🎨 PARAMETR: Rozmycie cienia
+            elevation: 8,               // 🎨 PARAMETR: Wysokość cienia na Androidzie
+            overflow: 'hidden',
           }}
         >
-          {mainCategories.map((category) =>
-            renderCategoryItem(
-              category,
-              () => handleSelectMainCategory(category),
-              activeCategory === category.id
-            )
-          )}
-        </ScrollView>
-      ) : (
-        // Widok wybranej kategorii głównej i jej podkategorii
-        <ScrollView
-          className="h-[84px]"
-          ref={subCategoriesScrollViewRef}
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={{
-            paddingLeft: 10,
-            paddingRight: 10,
-            gap: 12,
-            paddingVertical: 0,
-            alignItems: 'flex-end',
-          }}
-        >
-          {/* Przypięta kategoria główna jako pierwszy element */}
+          {!selectedMainCategory ? (
+            // ===== WIDOK GŁÓWNYCH KATEGORII =====
+            <ScrollView
+              className="h-[60px]"  // 🎨 PARAMETR: Wysokość ScrollView
+              ref={mainCategoriesScrollViewRef}
+              horizontal={true}     // 🎨 PARAMETR: Przewijanie poziome
+              showsHorizontalScrollIndicator={false} // 🎨 PARAMETR: Ukrywanie wskaźnika przewijania
+              onScroll={(event) => {
+                mainCategoryScrollPosition.current =
+                  event.nativeEvent.contentOffset.x;
+              }}
+              scrollEventThrottle={16} // 🎨 PARAMETR: Częstotliwość zdarzeń scroll (ms)
+              contentContainerStyle={{
+                paddingLeft: 4,     // 🎨 PARAMETR: Padding lewy zawartości ScrollView
+                paddingRight: 4,    // 🎨 PARAMETR: Padding prawy zawartości ScrollView
+                paddingVertical: 2,  // 🎨 PARAMETR: Padding górny i dolny zawartości
+                alignItems: 'center',
+              }}
+            >
+              {mainCategories.map((category) =>
+                renderCategoryItem(
+                  category,
+                  () => handleSelectMainCategory(category),
+                  activeCategory === category.id
+                )
+              )}
+            </ScrollView>
+          ) : (
+            // ===== WIDOK PODKATEGORII =====
+            <ScrollView
+              className="h-[60px]"  // 🎨 PARAMETR: Wysokość ScrollView podkategorii (80px)
+              ref={subCategoriesScrollViewRef}
+              horizontal={true}     // 🎨 PARAMETR: Przewijanie poziome
+              showsHorizontalScrollIndicator={false} // 🎨 PARAMETR: Ukrywanie wskaźnika przewijania
+              contentContainerStyle={{
+                paddingLeft: 4,     // 🎨 PARAMETR: Padding lewy zawartości ScrollView podkategorii
+                paddingRight: 4,    // 🎨 PARAMETR: Padding prawy zawartości ScrollView podkategorii
+                paddingVertical: 2,  // 🎨 PARAMETR: Padding górny i dolny zawartości podkategorii
+                alignItems: 'center',
+              }}
+            >
+          {/* ===== PRZYPIĘTA KATEGORIA GŁÓWNA (pierwszy element w widoku podkategorii) ===== */}
           <View
             key="main-category"
-            style={{ minWidth: 78, alignItems: 'center' }}
+            style={{ 
+              width: 80,           // 🎨 PARAMETR: Szerokość przypiętej kategorii głównej
+              alignItems: 'center', 
+              overflow: 'hidden' 
+            }}
           >
             {(() => {
               const IconComponent =
                 iconMap[selectedMainCategory.iconName] ||
                 iconMap['simple_square'];
-              const isActive = !selectedSubCategory;
+              const isActive = !selectedSubCategory; // Aktywna, gdy nie ma wybranej podkategorii
+              const isValidComponent = IconComponent && typeof IconComponent === 'function';
+              
               return (
-                <NeumorphicButton
-                  onPress={handleGoBackToMainCategories}
-                  text={selectedMainCategory.name}
-                  icon={<IconComponent />}
-                  outerColors={
-                    isActive ? ['#99A0A966', '#FFFFFF66'] : undefined
-                  }
-                  middleColors={isActive ? ['#D99AFA', '#BA3D4F'] : undefined}
-                  innerColors={isActive ? ['#D99AFA', '#BA3D4F'] : undefined}
-                  textColor={isActive ? 'black' : 'black'}
-                  iconColor={isActive ? 'white' : '#71717a'}
-                />
+                <View style={{ width: 80, alignItems: 'center', overflow: 'hidden' }}>
+                  <TouchableOpacity
+                    onPress={handleGoBackToMainCategories}
+                    style={isActive ? {
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      backgroundColor: '#069494', // 🎨 PARAMETR: Kolor tła aktywnej przypiętej kategorii obejmujący ikonę i tekst
+                      borderRadius: 20,           // 🎨 PARAMETR: Zaokrąglenie tła aktywnej przypiętej kategorii
+                      paddingHorizontal: 8,       // 🎨 PARAMETR: Padding poziomy całego przycisku przypiętej kategorii (aktywna)
+                      paddingVertical: 8,         // 🎨 PARAMETR: Padding pionowy całego przycisku przypiętej kategorii (aktywna)
+                      width: 72,                  // 🎨 PARAMETR: Szerokość przycisku aktywnej przypiętej kategorii
+                      maxHeight: 50,              // 🎨 PARAMETR: Minimalna wysokość przycisku aktywnej przypiętej kategorii
+                    } : {
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      paddingHorizontal: 8,       // 🎨 PARAMETR: Padding poziomy całego przycisku przypiętej kategorii (nieaktywna)
+                      paddingVertical: 8,         // 🎨 PARAMETR: Padding pionowy całego przycisku przypiętej kategorii (nieaktywna)
+                      width: 72,                  // 🎨 PARAMETR: Szerokość przycisku nieaktywnej przypiętej kategorii
+                      maxHeight: 50,              // 🎨 PARAMETR: Minimalna wysokość przycisku nieaktywnej przypiętej kategorii
+                    }}
+                    activeOpacity={0.7}   // 🎨 PARAMETR: Przezroczystość po naciśnięciu przypiętej kategorii
+                  >
+                    <View 
+                      style={{
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        marginBottom: 4,            // 🎨 PARAMETR: Odstęp między ikoną a tekstem przypiętej kategorii
+                      }}
+                    >
+                      {isValidComponent ? (
+                        <IconComponent 
+                          width={24}  // 🎨 PARAMETR: Szerokość ikony SVG przypiętej kategorii
+                          height={24} // 🎨 PARAMETR: Wysokość ikony SVG przypiętej kategorii
+                          stroke={isActive ? '#FFFFFF' : '#000000'} // 🎨 PARAMETR: Kolor stroke ikony przypiętej kategorii (aktywna biała/nieaktywna czarna)
+                          color={isActive ? '#FFFFFF' : '#000000'} // 🎨 PARAMETR: Kolor ikony przypiętej kategorii (aktywna biała/nieaktywna czarna)
+                        />
+                      ) : (
+                        <View 
+                          style={{
+                            width: 24,  // 🎨 PARAMETR: Szerokość fallback ikony przypiętej kategorii
+                            height: 24, // 🎨 PARAMETR: Wysokość fallback ikony przypiętej kategorii
+                            backgroundColor: isActive ? '#FFFFFF' : '#000000', // 🎨 PARAMETR: Kolor fallback ikony (aktywna biała/nieaktywna czarna) przypiętej kategorii
+                            borderRadius: 4, // 🎨 PARAMETR: Zaokrąglenie fallback ikony przypiętej kategorii
+                          }} 
+                        />
+                      )}
+                    </View>
+                    <Text 
+                      className={`text-[10px] font-medium text-center ${
+                        isActive ? 'text-white' : 'text-black' // 🎨 PARAMETR: Kolor tekstu przypiętej kategorii (aktywna biała/nieaktywna czarna)
+                      }`}
+                      numberOfLines={1}     // 🎨 PARAMETR: Maksymalna liczba linii tekstu przypiętej kategorii
+                      ellipsizeMode="tail"  // 🎨 PARAMETR: Sposób skracania tekstu przypiętej kategorii
+                      style={{ 
+                        textAlign: 'center',
+                        flexShrink: 0,
+                        lineHeight: 12,     // 🎨 PARAMETR: Wysokość linii tekstu przypiętej kategorii
+                      }}
+                    >
+                      {selectedMainCategory.name}
+                    </Text>
+                  </TouchableOpacity>
+                </View>
               );
             })()}
           </View>
 
-          {/* Podkategorie jako kolejne elementy */}
+          {/* ===== LISTA PODKATEGORII ===== */}
           {[...(subCategoriesMap.get(selectedMainCategory.id) || [])]
-            .reverse()
+            .reverse() // 🎨 PARAMETR: Kolejność podkategorii (reverse = odwrócona)
             .map((subCategory) =>
               renderCategoryItem(
                 subCategory,
@@ -423,18 +660,24 @@ const ExploreHeader = () => {
               )
             )}
 
-          {/* Komunikat o braku podkategorii */}
-          {(subCategoriesMap.get(selectedMainCategory.id) || []).length ===
-            0 && (
-            <View className="flex-1 items-center justify-center px-4">
-              <Text className="text-sm text-gray-500">
-                Brak podkategorii dla {selectedMainCategory.name}.
-              </Text>
-            </View>
+              {/* ===== KOMUNIKAT O BRAKU PODKATEGORII ===== */}
+              {(subCategoriesMap.get(selectedMainCategory.id) || []).length ===
+                0 && (
+                <View 
+                  className="flex-1 items-center justify-center px-4" // 🎨 PARAMETR: Padding poziomy komunikatu (px-4 = 16px)
+                >
+                  <Text 
+                    className="text-sm text-gray-500" // 🎨 PARAMETR: Rozmiar (text-sm) i kolor tekstu komunikatu (text-gray-500)
+                  >
+                    Brak podkategorii dla {selectedMainCategory.name}.
+                  </Text>
+                </View>
+              )}
+            </ScrollView>
           )}
-        </ScrollView>
-      )}
-    </SafeAreaView>
+        </View>
+      </SafeAreaView>
+    </View>
   );
 };
 

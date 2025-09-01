@@ -1,7 +1,7 @@
 import "../../global.css";
 import React, { useState } from "react";
 import { View } from "react-native";
-import Map from "@/components/maps/Map";
+import FallbackMap from "@/components/maps/FallbackMap";
 import type { Marker, MapBounds } from "@/lib/types/map";
  
 // Przykładowe markery kortów tenisowych w Krakowie
@@ -49,7 +49,7 @@ export default function HomeScreen() {
 
   return (
     <View className="flex-1 bg-background">
-      <Map
+      <FallbackMap
         markers={sampleMarkers}
         onBoundsChange={handleBoundsChange}
         onMapStateChange={handleMapStateChange}

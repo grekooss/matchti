@@ -32,7 +32,7 @@ const styles = StyleSheet.create({
   },
   mapTypeButton: {
     position: 'absolute',
-    top: 60,
+    top: 150, // Przesunięte w dół, żeby było poniżej ExploreHeader
     right: 10,
     backgroundColor: 'white',
     padding: 10,
@@ -46,7 +46,7 @@ const styles = StyleSheet.create({
   },
   locationButton: {
     position: 'absolute',
-    top: 60,
+    top: 150, // Przesunięte w dół, żeby było poniżej ExploreHeader
     left: 10,
     backgroundColor: 'white',
     padding: 10,

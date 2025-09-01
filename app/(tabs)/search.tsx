@@ -1,7 +1,8 @@
 import "../../global.css";
 import React, { useState } from "react";
 import { View } from "react-native";
-import FallbackMap from "@/components/maps/FallbackMap";
+import Map from "@/components/maps/Map";
+import ExploreHeader from "@/components/ExploreHeader";
 import type { Marker, MapBounds } from "@/lib/types/map";
 
 // Przykładowe markery obiektów sportowych w Krakowie
@@ -61,13 +62,14 @@ export default function SearchScreen() {
 
   return (
     <View className="flex-1 bg-background">
-      <FallbackMap
+      <Map
         markers={sampleMarkers}
         onBoundsChange={handleBoundsChange}
         onMapStateChange={handleMapStateChange}
         onMarkerPress={handleMarkerPress}
         initialState={mapState}
       />
+      <ExploreHeader />
     </View>
   );
 }
