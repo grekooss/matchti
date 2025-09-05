@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { ActivityIndicator, ScrollView, Text, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Sport, useSportsQuery } from '../lib/react-query/useSportsQuery';
 import { useCategoryStore } from '../lib/zustand/categoryStore';
@@ -277,7 +277,13 @@ const iconMap: Record<string, React.FC<any>> = {
 const ExploreHeader = () => {
   const { data: sports, isLoading, error } = useSportsQuery();
   const { activeCategory, setActiveCategory } = useCategoryStore();
-  const { isPopupOpen } = useBottomSheetStore();
+  const { isPopupOpen, isBottomSheetExpanded } = useBottomSheetStore();
+
+  // ExploreHeader jest zablokowany gdy popup jest otwarty LUB bottomsheet jest rozwinięty
+  const isBlocked = isPopupOpen || isBottomSheetExpanded;
+
+  // Debug log
+  console.log('🎯 ExploreHeader render - isPopupOpen:', isPopupOpen, 'isBottomSheetExpanded:', isBottomSheetExpanded, 'isBlocked:', isBlocked);
 
   const [selectedMainCategory, setSelectedMainCategory] = useState<
     Sport | undefined
@@ -329,8 +335,8 @@ const ExploreHeader = () => {
   }, [selectedMainCategory]);
 
   const handleSelectMainCategory = (category: Sport) => {
-    // Block category change when popup is open
-    if (isPopupOpen) {
+    // Blokuj interakcje gdy popup jest otwarty lub bottomsheet rozwinięty
+    if (isBlocked) {
       return;
     }
     
@@ -348,8 +354,8 @@ const ExploreHeader = () => {
   };
 
   const handleSelectSubCategory = (subCategory: Sport) => {
-    // Block category change when popup is open
-    if (isPopupOpen) {
+    // Blokuj interakcje gdy popup jest otwarty lub bottomsheet rozwinięty
+    if (isBlocked) {
       return;
     }
     
@@ -366,8 +372,8 @@ const ExploreHeader = () => {
   };
 
   const handleGoBackToMainCategories = () => {
-    // Block category change when popup is open
-    if (isPopupOpen) {
+    // Blokuj interakcje gdy popup jest otwarty lub bottomsheet rozwinięty
+    if (isBlocked) {
       return;
     }
     
@@ -453,16 +459,12 @@ const ExploreHeader = () => {
             )}
           </View>
           <Text 
-            className={`text-[10px] font-medium text-center ${
-              isActive ? 'text-white' : 'text-black' // 🎨 PARAMETR: Kolor tekstu (aktywna biała/nieaktywna czarna)
-            }`}
+            style={[
+              styles.categoryText,
+              isActive ? styles.activeCategoryText : styles.inactiveCategoryText
+            ]}
             numberOfLines={1}     // 🎨 PARAMETR: Maksymalna liczba linii tekstu
             ellipsizeMode="tail"  // 🎨 PARAMETR: Sposób skracania tekstu ('tail', 'head', 'middle')
-            style={{ 
-              textAlign: 'center',
-              flexShrink: 0,
-              lineHeight: 12,     // 🎨 PARAMETR: Wysokość linii tekstu
-            }}
           >
             {item.name}
           </Text>
@@ -474,10 +476,8 @@ const ExploreHeader = () => {
   // ===== STANY LOADING I ERROR =====
   if (isLoading) {
     return (
-      <SafeAreaView edges={['top']} className="">
-        <View 
-          className="h-20 items-center justify-center" // 🎨 PARAMETR: Wysokość kontenera podczas ładowania
-        >
+      <SafeAreaView edges={['top']}>
+        <View style={styles.loadingContainer}>
           <ActivityIndicator 
             size="large"      // 🎨 PARAMETR: Rozmiar spinnera ('small', 'large')
             color="#0000ff"   // 🎨 PARAMETR: Kolor spinnera
@@ -489,13 +489,9 @@ const ExploreHeader = () => {
 
   if (error) {
     return (
-      <SafeAreaView edges={['top']} className="">
-        <View 
-          className="h-20 items-center justify-center px-5" // 🎨 PARAMETR: Wysokość i padding kontenera błędu
-        >
-          <Text 
-            className="text-center text-red-500" // 🎨 PARAMETR: Kolor tekstu błędu
-          >
+      <SafeAreaView edges={['top']}>
+        <View style={styles.errorContainer}>
+          <Text style={styles.errorText}>
             Wystąpił błąd podczas ładowania kategorii: {error.message}
           </Text>
         </View>
@@ -504,30 +500,23 @@ const ExploreHeader = () => {
   }
 
   // ===== GŁÓWNY RENDER KOMPONENTU =====
+  // ExploreHeader jest zawsze widoczny
+
   return (
     <View 
-      className="absolute top-0 left-0 right-0 z-50" // 🎨 PARAMETR: Pozycjonowanie (absolute) i z-index
+      style={styles.container}
+      pointerEvents={isBlocked ? 'none' : 'auto'}
     >
       <SafeAreaView 
         edges={['top']} 
-        className="mx-3 mt-1" // 🎨 PARAMETR: Margines poziomy
+        style={styles.safeArea}
       >
-        <View 
-          className="bg-white shadow-lg" // 🎨 PARAMETR: Kolor tła i intensywność cienia
-          style={{
-            borderRadius: 20,           // 🎨 PARAMETR: Zaokrąglenie głównego kontenera (50 = pełne półkola)
-            shadowColor: '#000',        // 🎨 PARAMETR: Kolor cienia
-            shadowOffset: { width: 0, height: 4 }, // 🎨 PARAMETR: Przesunięcie cienia (x, y)
-            shadowOpacity: 0.1,         // 🎨 PARAMETR: Przezroczystość cienia (0.0-1.0)
-            shadowRadius: 12,           // 🎨 PARAMETR: Rozmycie cienia
-            elevation: 8,               // 🎨 PARAMETR: Wysokość cienia na Androidzie
-            overflow: 'hidden',
-          }}
+        <View style={styles.mainContainer}
         >
           {!selectedMainCategory ? (
             // ===== WIDOK GŁÓWNYCH KATEGORII =====
             <ScrollView
-              className="h-[60px]"  // 🎨 PARAMETR: Wysokość ScrollView
+              style={styles.scrollView}
               ref={mainCategoriesScrollViewRef}
               horizontal={true}     // 🎨 PARAMETR: Przewijanie poziome
               showsHorizontalScrollIndicator={false} // 🎨 PARAMETR: Ukrywanie wskaźnika przewijania
@@ -536,12 +525,7 @@ const ExploreHeader = () => {
                   event.nativeEvent.contentOffset.x;
               }}
               scrollEventThrottle={16} // 🎨 PARAMETR: Częstotliwość zdarzeń scroll (ms)
-              contentContainerStyle={{
-                paddingLeft: 4,     // 🎨 PARAMETR: Padding lewy zawartości ScrollView
-                paddingRight: 4,    // 🎨 PARAMETR: Padding prawy zawartości ScrollView
-                paddingVertical: 2,  // 🎨 PARAMETR: Padding górny i dolny zawartości
-                alignItems: 'center',
-              }}
+              contentContainerStyle={styles.scrollContentContainer}
             >
               {mainCategories.map((category) =>
                 renderCategoryItem(
@@ -554,16 +538,11 @@ const ExploreHeader = () => {
           ) : (
             // ===== WIDOK PODKATEGORII =====
             <ScrollView
-              className="h-[60px]"  // 🎨 PARAMETR: Wysokość ScrollView podkategorii (80px)
+              style={styles.scrollView}
               ref={subCategoriesScrollViewRef}
               horizontal={true}     // 🎨 PARAMETR: Przewijanie poziome
               showsHorizontalScrollIndicator={false} // 🎨 PARAMETR: Ukrywanie wskaźnika przewijania
-              contentContainerStyle={{
-                paddingLeft: 4,     // 🎨 PARAMETR: Padding lewy zawartości ScrollView podkategorii
-                paddingRight: 4,    // 🎨 PARAMETR: Padding prawy zawartości ScrollView podkategorii
-                paddingVertical: 2,  // 🎨 PARAMETR: Padding górny i dolny zawartości podkategorii
-                alignItems: 'center',
-              }}
+              contentContainerStyle={styles.scrollContentContainer}
             >
           {/* ===== PRZYPIĘTA KATEGORIA GŁÓWNA (pierwszy element w widoku podkategorii) ===== */}
           <View
@@ -630,16 +609,12 @@ const ExploreHeader = () => {
                       )}
                     </View>
                     <Text 
-                      className={`text-[10px] font-medium text-center ${
-                        isActive ? 'text-white' : 'text-black' // 🎨 PARAMETR: Kolor tekstu przypiętej kategorii (aktywna biała/nieaktywna czarna)
-                      }`}
+                      style={[
+                        styles.categoryText,
+                        isActive ? styles.activeCategoryText : styles.inactiveCategoryText
+                      ]}
                       numberOfLines={1}     // 🎨 PARAMETR: Maksymalna liczba linii tekstu przypiętej kategorii
                       ellipsizeMode="tail"  // 🎨 PARAMETR: Sposób skracania tekstu przypiętej kategorii
-                      style={{ 
-                        textAlign: 'center',
-                        flexShrink: 0,
-                        lineHeight: 12,     // 🎨 PARAMETR: Wysokość linii tekstu przypiętej kategorii
-                      }}
                     >
                       {selectedMainCategory.name}
                     </Text>
@@ -663,12 +638,8 @@ const ExploreHeader = () => {
               {/* ===== KOMUNIKAT O BRAKU PODKATEGORII ===== */}
               {(subCategoriesMap.get(selectedMainCategory.id) || []).length ===
                 0 && (
-                <View 
-                  className="flex-1 items-center justify-center px-4" // 🎨 PARAMETR: Padding poziomy komunikatu (px-4 = 16px)
-                >
-                  <Text 
-                    className="text-sm text-gray-500" // 🎨 PARAMETR: Rozmiar (text-sm) i kolor tekstu komunikatu (text-gray-500)
-                  >
+                <View style={styles.noSubcategoriesContainer}>
+                  <Text style={styles.noSubcategoriesText}>
                     Brak podkategorii dla {selectedMainCategory.name}.
                   </Text>
                 </View>
@@ -680,5 +651,76 @@ const ExploreHeader = () => {
     </View>
   );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    zIndex: 50,
+  },
+  safeArea: {
+    marginHorizontal: 12,
+    marginTop: 4,
+  },
+  mainContainer: {
+    backgroundColor: 'white',
+    borderRadius: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 12,
+    elevation: 8,
+    overflow: 'hidden',
+  },
+  loadingContainer: {
+    height: 80,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  errorContainer: {
+    height: 80,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 20,
+  },
+  errorText: {
+    textAlign: 'center',
+    color: '#EF4444',
+  },
+  scrollView: {
+    height: 60,
+  },
+  scrollContentContainer: {
+    paddingLeft: 4,
+    paddingRight: 4,
+    paddingVertical: 2,
+    alignItems: 'center',
+  },
+  categoryText: {
+    fontSize: 10,
+    fontWeight: '500',
+    textAlign: 'center',
+    flexShrink: 0,
+    lineHeight: 12,
+  },
+  activeCategoryText: {
+    color: 'white',
+  },
+  inactiveCategoryText: {
+    color: 'black',
+  },
+  noSubcategoriesContainer: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 16,
+  },
+  noSubcategoriesText: {
+    fontSize: 14,
+    color: '#6B7280',
+  },
+});
 
 export default ExploreHeader;

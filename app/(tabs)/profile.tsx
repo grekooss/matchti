@@ -1,15 +1,35 @@
-import "../../global.css";
-import { Text, View } from "react-native";
+import { StyleSheet, Text, View } from "react-native";
 
 export default function ProfileScreen() {
   return (
-    <View className="flex-1 items-center justify-center bg-background">
-      <Text className="text-xl font-bold text-text-primary font-inter">
+    <View style={styles.container}>
+      <Text style={styles.title}>
         Profile Screen
       </Text>
-      <Text className="text-text-secondary font-inter mt-2">
+      <Text style={styles.subtitle}>
         Twój profil gracza
       </Text>
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#F8F9FA',
+    // Padding dla reklamy Google jest już uwzględniony w _layout.tsx
+  },
+  title: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#1A202C',
+    fontFamily: 'Inter',
+  },
+  subtitle: {
+    color: '#718096',
+    fontFamily: 'Inter',
+    marginTop: 8,
+  },
+});

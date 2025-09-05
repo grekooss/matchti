@@ -1,91 +1,186 @@
-Cannot find module '../assets/icons/categories/airsoft.svg' or its corresponding type declarations.
-Cannot find module '../assets/icons/categories/american_football.svg' or its corresponding type declarations.
-Cannot find module '../assets/icons/categories/archery.svg' or its corresponding type declarations.
-Cannot find module '../assets/icons/categories/athletics.svg' or its corresponding type declarations.
-Cannot find module '../assets/icons/categories/badminton.svg' or its corresponding type declarations.
-Cannot find module '../assets/icons/categories/baseball.svg' or its corresponding type declarations.
-Cannot find module '../assets/icons/categories/basketball.svg' or its corresponding type declarations.
-Cannot find module '../assets/icons/categories/beach_handball.svg' or its corresponding type declarations.
-Cannot find module '../assets/icons/categories/beach_volleyball.svg' or its corresponding type declarations.
-Cannot find module '../assets/icons/categories/beachsoccer.svg' or its corresponding type declarations.
-Cannot find module '../assets/icons/categories/billiards.svg' or its corresponding type declarations.
-Cannot find module '../assets/icons/categories/bmx.svg' or its corresponding type declarations.
-Cannot find module '../assets/icons/categories/board_game.svg' or its corresponding type declarations.
-Cannot find module '../assets/icons/categories/boules.svg' or its corresponding type declarations.
-Cannot find module '../assets/icons/categories/bowling.svg' or its corresponding type declarations.
-Cannot find module '../assets/icons/categories/calisthenics.svg' or its corresponding type declarations.
-Cannot find module '../assets/icons/categories/chess.svg' or its corresponding type declarations.
-Cannot find module '../assets/icons/categories/cricket.svg' or its corresponding type declarations.
-Cannot find module '../assets/icons/categories/crossfit.svg' or its corresponding type declarations.
-Cannot find module '../assets/icons/categories/curling.svg' or its corresponding type declarations.
-Cannot find module '../assets/icons/categories/darts.svg' or its corresponding type declarations.
-Cannot find module '../assets/icons/categories/dodgeball.svg' or its corresponding type declarations.
-Cannot find module '../assets/icons/categories/field_hockey.svg' or its corresponding type declarations.
-Cannot find module '../assets/icons/categories/fistball.svg' or its corresponding type declarations.
-Cannot find module '../assets/icons/categories/fitness.svg' or its corresponding type declarations.
-Cannot find module '../assets/icons/categories/floorball.svg' or its corresponding type declarations.
-Cannot find module '../assets/icons/categories/funnel_ball.svg' or its corresponding type declarations.
-Cannot find module '../assets/icons/categories/futsal.svg' or its corresponding type declarations.
-Cannot find module '../assets/icons/categories/golf.svg' or its corresponding type declarations.
-Cannot find module '../assets/icons/categories/handball.svg' or its corresponding type declarations.
-Cannot find module '../assets/icons/categories/ice_hockey.svg' or its corresponding type declarations.
-Cannot find module '../assets/icons/categories/ice_skating.svg' or its corresponding type declarations.
-Cannot find module '../assets/icons/categories/kick_scooter.svg' or its corresponding type declarations.
-Cannot find module '../assets/icons/categories/laser_tag.svg' or its corresponding type declarations.
-Cannot find module '../assets/icons/categories/miniature_golf.svg' or its corresponding type declarations.
-Cannot find module '../assets/icons/categories/mountain_biking.svg' or its corresponding type declarations.
-Cannot find module '../assets/icons/categories/netball.svg' or its corresponding type declarations.
-Cannot find module '../assets/icons/categories/padel.svg' or its corresponding type declarations.
-Cannot find module '../assets/icons/categories/paintball.svg' or its corresponding type declarations.
-Cannot find module '../assets/icons/categories/panna.svg' or its corresponding type declarations.
-Cannot find module '../assets/icons/categories/playing_adventure.svg' or its corresponding type declarations.
-Cannot find module '../assets/icons/categories/playing_air_sports.svg' or its corresponding type declarations.
-Cannot find module '../assets/icons/categories/playing_baseball.svg' or its corresponding type declarations.
-Cannot find module '../assets/icons/categories/playing_basketball.svg' or its corresponding type declarations.
-Cannot find module '../assets/icons/categories/playing_board_games.svg' or its corresponding type declarations.
-Cannot find module '../assets/icons/categories/playing_bowling_billiards.svg' or its corresponding type declarations.
-Cannot find module '../assets/icons/categories/playing_combat.svg' or its corresponding type declarations.
-Cannot find module '../assets/icons/categories/playing_cycling.svg' or its corresponding type declarations.
-Cannot find module '../assets/icons/categories/playing_football.svg' or its corresponding type declarations.
-Cannot find module '../assets/icons/categories/playing_golf.svg' or its corresponding type declarations.
-Cannot find module '../assets/icons/categories/playing_gymnastics.svg' or its corresponding type declarations.
-Cannot find module '../assets/icons/categories/playing_handball.svg' or its corresponding type declarations.
-Cannot find module '../assets/icons/categories/playing_hockey.svg' or its corresponding type declarations.
-Cannot find module '../assets/icons/categories/playing_horse_riding.svg' or its corresponding type declarations.
-Cannot find module '../assets/icons/categories/playing_motor_sports.svg' or its corresponding type declarations.
-Cannot find module '../assets/icons/categories/playing_rugby.svg' or its corresponding type declarations.
-Cannot find module '../assets/icons/categories/playing_running.svg' or its corresponding type declarations.
-Cannot find module '../assets/icons/categories/playing_sailing.svg' or its corresponding type declarations.
-Cannot find module '../assets/icons/categories/playing_shooting.svg' or its corresponding type declarations.
-Cannot find module '../assets/icons/categories/playing_skating.svg' or its corresponding type declarations.
-Cannot find module '../assets/icons/categories/playing_skiing.svg' or its corresponding type declarations.
-Cannot find module '../assets/icons/categories/playing_strength_fitness.svg' or its corresponding type declarations.
-Cannot find module '../assets/icons/categories/playing_swimming.svg' or its corresponding type declarations.
-Cannot find module '../assets/icons/categories/playing_tennis.svg' or its corresponding type declarations.
-Cannot find module '../assets/icons/categories/playing_volleyball.svg' or its corresponding type declarations.
-Cannot find module '../assets/icons/categories/racquetball.svg' or its corresponding type declarations.
-Cannot find module '../assets/icons/categories/road_cycling.svg' or its corresponding type declarations.
-Cannot find module '../assets/icons/categories/roller_hockey.svg' or its corresponding type declarations.
-Cannot find module '../assets/icons/categories/roller_skating.svg' or its corresponding type declarations.
-Cannot find module '../assets/icons/categories/rugby.svg' or its corresponding type declarations.
-Cannot find module '../assets/icons/categories/running.svg' or its corresponding type declarations.
-Cannot find module '../assets/icons/categories/shooting.svg' or its corresponding type declarations.
-Cannot find module '../assets/icons/categories/simple_square.svg' or its corresponding type declarations.
-Cannot find module '../assets/icons/categories/skateboard.svg' or its corresponding type declarations.
-Cannot find module '../assets/icons/categories/soccer.svg' or its corresponding type declarations.
-Cannot find module '../assets/icons/categories/softball.svg' or its corresponding type declarations.
-Cannot find module '../assets/icons/categories/sports_walk.svg' or its corresponding type declarations.
-Cannot find module '../assets/icons/categories/squash.svg' or its corresponding type declarations.
-Cannot find module '../assets/icons/categories/streetball.svg' or its corresponding type declarations.
-Cannot find module '../assets/icons/categories/table_tennis.svg' or its corresponding type declarations.
-Cannot find module '../assets/icons/categories/tennis.svg' or its corresponding type declarations.
-Cannot find module '../assets/icons/categories/teqball.svg' or its corresponding type declarations.
-Cannot find module '../assets/icons/categories/volleyball.svg' or its corresponding type declarations.
-Cannot find module '../assets/icons/categories/weightlifting.svg' or its corresponding type declarations.
-Cannot find module '../assets/icons/categories/yoga.svg' or its corresponding type declarations.
-Argument of type 'undefined' is not assignable to parameter of type 'number | null'.
-Argument of type 'undefined' is not assignable to parameter of type 'number | null'.
-Type '{ width: number; height: number; stroke: string; color: string; }' is not assignable to type 'IntrinsicAttributes'.
-  Property 'width' does not exist on type 'IntrinsicAttributes'.
-Type '{ width: number; height: number; stroke: string; color: string; }' is not assignable to type 'IntrinsicAttributes'.
-  Property 'width' does not exist on type 'IntrinsicAttributes'.
+Running 'gradlew :app:assembleDebug' in /home/expo/workingdir/build/matchti/android
+Welcome to Gradle 8.13!
+Here are the highlights of this release:
+- Daemon JVM auto-provisioning
+ - Enhancements for Scala plugin and JUnit testing
+ - Improvements for build authors and plugin developers
+For more details see https://docs.gradle.org/8.13/release-notes.html
+To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/8.13/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+Daemon will be stopped at the end of the build
+> Configure project :expo-gradle-plugin:expo-autolinking-plugin-shared
+w: file:///home/expo/workingdir/build/matchti/node_modules/expo-modules-autolinking/android/expo-gradle-plugin/expo-autolinking-plugin-shared/build.gradle.kts:32:9: The expression is unused
+> Task :gradle-plugin:shared:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :gradle-plugin:settings-plugin:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :expo-gradle-plugin:expo-autolinking-settings-plugin:checkKotlinGradlePluginConfigurationErrors
+> Task :expo-gradle-plugin:expo-autolinking-plugin-shared:checkKotlinGradlePluginConfigurationErrors
+> Task :gradle-plugin:settings-plugin:pluginDescriptors
+> Task :expo-gradle-plugin:expo-autolinking-settings-plugin:pluginDescriptors
+> Task :gradle-plugin:settings-plugin:processResources
+> Task :expo-gradle-plugin:expo-autolinking-settings-plugin:processResources
+> Task :expo-gradle-plugin:expo-autolinking-plugin-shared:processResources NO-SOURCE
+> Task :gradle-plugin:shared:processResources
+NO-SOURCE
+> Task :gradle-plugin:shared:compileKotlin
+> Task :gradle-plugin:shared:compileJava NO-SOURCE
+> Task :gradle-plugin:shared:classes UP-TO-DATE
+> Task :gradle-plugin:shared:jar
+> Task :expo-gradle-plugin:expo-autolinking-plugin-shared:compileKotlin
+> Task :expo-gradle-plugin:expo-autolinking-plugin-shared:compileJava NO-SOURCE
+> Task :expo-gradle-plugin:expo-autolinking-plugin-shared:classes UP-TO-DATE
+> Task :expo-gradle-plugin:expo-autolinking-plugin-shared:jar
+> Task :gradle-plugin:settings-plugin:compileKotlin
+> Task :gradle-plugin:settings-plugin:compileJava NO-SOURCE
+> Task :gradle-plugin:settings-plugin:classes
+> Task :gradle-plugin:settings-plugin:jar
+> Task :expo-gradle-plugin:expo-autolinking-settings-plugin:compileKotlin
+> Task :expo-gradle-plugin:expo-autolinking-settings-plugin:compileJava NO-SOURCE
+> Task :expo-gradle-plugin:expo-autolinking-settings-plugin:classes
+> Task :expo-gradle-plugin:expo-autolinking-settings-plugin:jar
+> Task :expo-gradle-plugin:expo-autolinking-plugin:checkKotlinGradlePluginConfigurationErrors
+> Task :expo-dev-launcher-gradle-plugin:checkKotlinGradlePluginConfigurationErrors
+> Task :gradle-plugin:react-native-gradle-plugin:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :expo-module-gradle-plugin:checkKotlinGradlePluginConfigurationErrors
+> Task :expo-dev-launcher-gradle-plugin:pluginDescriptors
+> Task :expo-module-gradle-plugin:pluginDescriptors
+> Task :expo-dev-launcher-gradle-plugin:processResources
+> Task :expo-module-gradle-plugin:processResources
+> Task :expo-gradle-plugin:expo-autolinking-plugin:pluginDescriptors
+> Task :expo-gradle-plugin:expo-autolinking-plugin:processResources
+> Task :gradle-plugin:react-native-gradle-plugin:pluginDescriptors
+> Task :gradle-plugin:react-native-gradle-plugin:processResources
+> Task :expo-gradle-plugin:expo-autolinking-plugin:compileKotlin
+w: file:///home/expo/workingdir/build/matchti/node_modules/expo-modules-autolinking/android/expo-gradle-plugin/expo-autolinking-plugin/src/main/kotlin/expo/modules/plugin/ExpoAutolinkingPlugin.kt:29:71 Name shadowed: project
+> Task :expo-gradle-plugin:expo-autolinking-plugin:compileJava NO-SOURCE
+> Task :expo-gradle-plugin:expo-autolinking-plugin:classes
+> Task :expo-gradle-plugin:expo-autolinking-plugin:jar
+> Task :gradle-plugin:react-native-gradle-plugin:compileKotlin
+> Task :gradle-plugin:react-native-gradle-plugin:compileJava NO-SOURCE
+> Task :gradle-plugin:react-native-gradle-plugin:classes
+> Task :gradle-plugin:react-native-gradle-plugin:jar
+> Task :expo-dev-launcher-gradle-plugin:compileKotlin
+> Task :expo-dev-launcher-gradle-plugin:compileJava NO-SOURCE
+> Task :expo-dev-launcher-gradle-plugin:classes
+> Task :expo-dev-launcher-gradle-plugin:jar
+> Task :expo-module-gradle-plugin:compileKotlin
+w: file:///home/expo/workingdir/build/matchti/node_modules/expo-modules-core/expo-module-gradle-plugin/src/main/kotlin/expo/modules/plugin/android/AndroidLibraryExtension.kt:9:24 'targetSdk: Int?' is deprecated. Will be removed from library DSL in v9.0. Use testOptions.targetSdk or/and lint.targetSdk instead
+> Task :expo-module-gradle-plugin:compileJava NO-SOURCE
+> Task :expo-module-gradle-plugin:classes
+> Task :expo-module-gradle-plugin:jar
+> Configure project :
+[ExpoRootProject] Using the following versions:
+  - buildTools:  35.0.0
+  - minSdk:      24
+  - compileSdk:  35
+  - targetSdk:   35
+  - ndk:         27.1.12297006
+  - kotlin:      2.0.21
+- ksp:         2.0.21-1.0.28
+> Configure project :app
+ ℹ️  Applying gradle plugin 'expo-dev-launcher-gradle-plugin'
+Checking the license for package NDK (Side by side) 27.1.12297006 in /home/expo/Android/Sdk/licenses
+License for package NDK (Side by side) 27.1.12297006 accepted.
+Preparing "Install NDK (Side by side) 27.1.12297006 v.27.1.12297006".
+"Install NDK (Side by side) 27.1.12297006 v.27.1.12297006" ready.
+Installing NDK (Side by side) 27.1.12297006 in /home/expo/Android/Sdk/ndk/27.1.12297006
+"Install NDK (Side by side) 27.1.12297006 v.27.1.12297006" complete.
+"Install NDK (Side by side) 27.1.12297006 v.27.1.12297006" finished.
+> Configure project :expo
+Using expo modules
+  - expo-constants (17.1.7)
+  - expo-dev-client (5.2.4)
+  - expo-dev-launcher (5.1.16)
+  - expo-dev-menu (6.1.14)
+  - expo-dev-menu-interface (1.10.0)
+  - expo-json-utils (0.15.0)
+  - expo-manifests (0.16.6)
+- expo-modules-core (2.5.0)
+- expo-updates-interface (1.1.0)
+  - [📦] expo-asset (11.1.7)
+  - [📦] expo-blur (14.1.5)
+  - [📦] expo-file-system (18.1.11)
+  - [📦] expo-font (13.3.2)
+  - [📦] expo-haptics (14.1.4)
+  - [📦] expo-image (2.4.0)
+  - [📦] expo-keep-awake (14.1.4)
+  - [📦] expo-linear-gradient (14.1.5)
+  - [📦] expo-linking (7.1.7)
+  - [📦] expo-location (18.1.6)
+  - [📦] expo-navigation-bar (4.2.8)
+  - [📦] expo-splash-screen (0.30.10)
+  - [📦] expo-system-ui (5.0.11)
+  - [📦] expo-web-browser (14.2.0)
+[Incubating] Problems report is available at: file:///home/expo/workingdir/build/matchti/android/build/reports/problems/problems-report.html
+FAILURE: Build failed with an exception.
+* What went wrong:
+Could not determine the dependencies of task ':app:compileDebugJavaWithJavac'.
+> Could not resolve all dependencies for configuration ':app:debugCompileClasspath'.
+   > Could not resolve project :react-native-async-storage_async-storage.
+     Required by:
+         project :app
+      > No matching variant of project :react-native-async-storage_async-storage was found. The consumer was configured to find a library for use during compile-time, preferably optimized for Android, as well as attribute 'com.android.build.api.attributes.AgpVersionAttr' with value '8.8.2', attribute 'com.android.build.api.attributes.BuildTypeAttr' with value 'debug', attribute 'org.jetbrains.kotlin.platform.type' with value 'androidJvm' but:
+          - No variants exist.
+   > Could not resolve project :react-native-gesture-handler.
+     Required by:
+         project :app
+      > No matching variant of project :react-native-gesture-handler was found. The consumer was configured to find a library for use during compile-time, preferably optimized for Android, as well as attribute 'com.android.build.api.attributes.AgpVersionAttr' with value '8.8.2', attribute 'com.android.build.api.attributes.BuildTypeAttr' with value 'debug', attribute 'org.jetbrains.kotlin.platform.type' with value 'androidJvm' but:
+          - No variants exist.
+   > Could not resolve project :react-native-get-random-values.
+     Required by:
+         project :app
+      > No matching variant of project :react-native-get-random-values was found. The consumer was configured to find a library for use during compile-time, preferably optimized for Android, as well as attribute 'com.android.build.api.attributes.AgpVersionAttr' with value '8.8.2', attribute 'com.android.build.api.attributes.BuildTypeAttr' with value 'debug', attribute 'org.jetbrains.kotlin.platform.type' with value 'androidJvm' but:
+          - No variants exist.
+   > Could not resolve project :react-native-maps.
+     Required by:
+         project :app
+      > No matching variant of project :react-native-maps was found. The consumer was configured to find a library for use during compile-time, preferably optimized for Android, as well as attribute 'com.android.build.api.attributes.AgpVersionAttr' with value '8.8.2', attribute 'com.android.build.api.attributes.BuildTypeAttr' with value 'debug', attribute 'org.jetbrains.kotlin.platform.type' with value 'androidJvm' but:
+          - No variants exist.
+   > Could not resolve project :react-native-pager-view.
+     Required by:
+         project :app
+      > No matching variant of project :react-native-pager-view was found. The consumer was configured to find a library for use during compile-time, preferably optimized for Android, as well as attribute 'com.android.build.api.attributes.AgpVersionAttr' with value '8.8.2', attribute 'com.android.build.api.attributes.BuildTypeAttr' with value 'debug', attribute 'org.jetbrains.kotlin.platform.type' with value 'androidJvm' but:
+          - No variants exist.
+   > Could not resolve project :react-native-reanimated.
+     Required by:
+         project :app
+      > No matching variant of project :react-native-reanimated was found. The consumer was configured to find a library for use during compile-time, preferably optimized for Android, as well as attribute 'com.android.build.api.attributes.AgpVersionAttr' with value '8.8.2', attribute 'com.android.build.api.attributes.BuildTypeAttr' with value 'debug', attribute 'org.jetbrains.kotlin.platform.type' with value 'androidJvm' but:
+          - No variants exist.
+   > Could not resolve project :react-native-safe-area-context.
+     Required by:
+         project :app
+      > No matching variant of project :react-native-safe-area-context was found. The consumer was configured to find a library for use during compile-time, preferably optimized for Android, as well as attribute 'com.android.build.api.attributes.AgpVersionAttr' with value '8.8.2', attribute 'com.android.build.api.attributes.BuildTypeAttr' with value 'debug', attribute 'org.jetbrains.kotlin.platform.type' with value 'androidJvm' but:
+          - No variants exist.
+   > Could not resolve project :react-native-screens.
+     Required by:
+         project :app
+      > No matching variant of project :react-native-screens was found. The consumer was configured to find a library for use during compile-time, preferably optimized for Android, as well as attribute 'com.android.build.api.attributes.AgpVersionAttr' with value '8.8.2', attribute 'com.android.build.api.attributes.BuildTypeAttr' with value 'debug', attribute 'org.jetbrains.kotlin.platform.type' with value 'androidJvm' but:
+          - No variants exist.
+   > Could not resolve project :react-native-svg.
+     Required by:
+         project :app
+      > No matching variant of project :react-native-svg was found. The consumer was configured to find a library for use during compile-time, preferably optimized for Android, as well as attribute 'com.android.build.api.attributes.AgpVersionAttr' with value '8.8.2', attribute 'com.android.build.api.attributes.BuildTypeAttr' with value 'debug', attribute 'org.jetbrains.kotlin.platform.type' with value 'androidJvm' but:
+          - No variants exist.
+   > Could not resolve project :react-native-webview.
+     Required by:
+project :app
+>
+No matching variant of
+project :react-native-webview was found. The consumer was configured to find a library for use during compile-time, preferably optimized for Android, as well as attribute 'com.android.build.api.attributes.AgpVersionAttr' with value '8.8.2', attribute 'com.android.build.api.attributes.BuildTypeAttr' with value 'debug', attribute 'org.jetbrains.kotlin.platform.type' with value 'androidJvm' but:
+          - No variants exist.
+   > Could not resolve project :react-native-edge-to-edge.
+     Required by:
+         project :app
+      > No matching variant of project :react-native-edge-to-edge was found. The consumer was configured to find a library for use during compile-time, preferably optimized for Android, as well as attribute 'com.android.build.api.attributes.AgpVersionAttr' with value '8.8.2', attribute 'com.android.build.api.attributes.BuildTypeAttr' with value 'debug', attribute 'org.jetbrains.kotlin.platform.type' with value 'androidJvm' but:
+          - No variants exist.
+* Try:
+> Creating consumable variants is explained in more detail at https://docs.gradle.org/8.13/userguide/declaring_dependencies.html#sec:resolvable-consumable-configs.
+> Review the variant matching algorithm at https://docs.gradle.org/8.13/userguide/variant_attributes.html#sec:abm_algorithm.
+> Run with --stacktrace option to get the stack trace.
+> Run with --info or --debug option to get more log output.
+> Run with --scan to get full insights.
+> Get more help at https://help.gradle.org.
+BUILD FAILED in 2m 7s
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+For more on this, please refer to https://docs.gradle.org/8.13/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+33 actionable tasks: 33 executed
+Error: Gradle build failed with unknown error. See logs for the "Run gradlew" phase for more information.

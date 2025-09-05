@@ -289,13 +289,18 @@ const GoogleMapsView: React.FC<GoogleMapsViewProps> = ({
   );
 };
 
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     overflow: 'hidden',
   },
   map: {
-    ...StyleSheet.absoluteFillObject,
+    position: 'absolute',
+    top: 0,
+    bottom: 0,
+    left: 0,
+    right: 0,
   },
 });
 

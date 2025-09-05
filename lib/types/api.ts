@@ -52,7 +52,7 @@ export interface FacilityListItemDto {
  */
 export interface FacilitiesListResponseDto {
   items: FacilityListItemDto[];
-  total: number;
+  totalCount: number; // Zmienione z 'total' na 'totalCount' zgodnie z useFacilitiesQuery
   limit: number;
   offset: number;
 }

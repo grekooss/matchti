@@ -6,6 +6,7 @@ import PagerView from 'react-native-pager-view';
 import type { FacilityListItemDto, GeoJsonPolygon } from '../../lib/types/api';
 import type { Marker } from '../../lib/types/map';
 import { useBottomSheetStore } from '../../lib/zustand/bottomSheetStore';
+import { useExploreHeaderHeight } from '../../hooks/useExploreHeaderHeight';
 import PopupMap from './PopupMap';
 
 // Sport icons imports
@@ -63,6 +64,9 @@ const sportIconMap: Record<string, React.FC<React.SVGProps<SVGSVGElement>>> = {
 const FacilityPopup = ({ facility, onClose }: FacilityPopupProps) => {
   // Get expandSheet and collapseSheet functions to manage BottomSheet
   const { expandSheet, collapseSheet } = useBottomSheetStore();
+  
+  // Get dynamic popup position
+  const { getPopupBottomPosition } = useExploreHeaderHeight();
   
   // State for map type pager (0: satellite, 1: carto, 2: standard)
   const [currentPage, setCurrentPage] = useState(0);
@@ -155,18 +159,21 @@ const FacilityPopup = ({ facility, onClose }: FacilityPopupProps) => {
     });
   };
 
+  // Dynamic bottom position
+  const dynamicBottomPosition = getPopupBottomPosition(); // Używa domyślnej wartości (0px) z hooka
+  
   return (
-    <View style={styles.container}>
-      <View style={styles.touchable}>
+    <View style={[styles.container, { bottom: dynamicBottomPosition }]}>
+      <View style={styles.popup}>
         <View style={styles.card}>
           <View style={styles.mapContainer}>
             <PagerView 
-              style={styles.pagerView}
+              style={styles.pager}
               initialPage={0}
               onPageSelected={(e) => setCurrentPage(e.nativeEvent.position)}
             >
               {mapTypes.map((mapType, index) => (
-                <View key={index} style={styles.page} pointerEvents="none">
+                <View key={index} style={styles.mapPage} pointerEvents="none">
                   <PopupMap 
                     marker={marker} 
                     center={[latitude, longitude]} 
@@ -178,13 +185,13 @@ const FacilityPopup = ({ facility, onClose }: FacilityPopupProps) => {
             </PagerView>
             
             {/* Dot indicators - centered */}
-            <View style={styles.dotContainer}>
+            <View style={styles.indicators}>
               {mapTypes.map((_, index) => (
                 <View
                   key={index}
                   style={[
                     styles.dot,
-                    currentPage === index && styles.activeDot
+                    currentPage === index ? styles.activeDot : styles.inactiveDot
                   ]}
                 />
               ))}
@@ -218,25 +225,25 @@ const FacilityPopup = ({ facility, onClose }: FacilityPopupProps) => {
           </View>
 
           <TouchableOpacity 
-            style={styles.infoContainer}
+            style={styles.content}
             onPress={handlePress}
             activeOpacity={0.7}
           >
-            <View style={{ marginBottom: 8 }}>
+            <View style={styles.contentInner}>
               <Text style={styles.title}>{displayName}</Text>
               <Text style={styles.address}>{formattedAddress}</Text>
               {facility.surface_type && (
                 <View style={styles.surfaceContainer}>
-                  <Text style={styles.surfaceTitle}>{facility.surface_type}</Text>
+                  <Text style={styles.surfaceText}>{facility.surface_type}</Text>
                 </View>
               )}
               
               {/* Sport icons */}
               {sportIcons.length > 0 && (
-                <View style={styles.sportsSection}>
-                  <View style={styles.sportIconsRow}>
+                <View style={styles.sportsContainer}>
+                  <View style={styles.sportsIcons}>
                     {sportIcons.map((sport) => (
-                      <View key={sport.id} style={styles.sportIconItem}>
+                      <View key={sport.id} style={styles.sportIcon}>
                         <sport.IconComponent width={20} height={20} fill="#374151" />
                       </View>
                     ))}
@@ -254,14 +261,14 @@ const FacilityPopup = ({ facility, onClose }: FacilityPopupProps) => {
 const styles = StyleSheet.create({
   container: {
     position: 'absolute',
-    bottom: 20,
+    // bottom pozycja jest teraz dynamiczna - ustawiona inline w komponencie
     left: 0,
     right: 0,
     alignItems: 'center',
     justifyContent: 'center',
     zIndex: 1000,
   },
-  touchable: {
+  popup: {
     width: '90%',
     maxWidth: 400,
   },
@@ -271,26 +278,26 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-    elevation: 5,
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 4,
   },
   mapContainer: {
     width: '100%',
     height: 200,
     position: 'relative',
   },
-  pagerView: {
+  pager: {
     flex: 1,
   },
-  page: {
+  mapPage: {
     flex: 1,
   },
-  dotContainer: {
+  indicators: {
     position: 'absolute',
     bottom: 12,
     left: '50%',
-    transform: [{ translateX: -24 }], // Half of container width to center
+    transform: [{ translateX: -24 }],
     flexDirection: 'row',
     alignItems: 'center',
   },
@@ -298,30 +305,16 @@ const styles = StyleSheet.create({
     width: 8,
     height: 8,
     borderRadius: 4,
-    backgroundColor: '#E5E7EB',
     marginHorizontal: 3,
   },
   activeDot: {
-    backgroundColor: '#C474F6',
+    backgroundColor: '#0F766E',
     width: 10,
     height: 10,
     borderRadius: 5,
   },
-  sportsSection: {
-    marginTop: 8,
-    paddingTop: 8,
-    paddingBottom: 4,
-    borderTopWidth: 1,
-    borderTopColor: '#e5e7eb',
-  },
-  sportIconsRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  sportIconItem: {
-    alignItems: 'center',
-    justifyContent: 'center',
+  inactiveDot: {
+    backgroundColor: '#D1D5DB',
   },
   closeButton: {
     position: 'absolute',
@@ -338,33 +331,53 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.2,
-    shadowRadius: 1.41,
-    elevation: 3,
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 2,
   },
-  infoContainer: {
+  content: {
     padding: 12,
     paddingBottom: 8,
+  },
+  contentInner: {
+    marginBottom: 8,
   },
   title: {
     fontSize: 16,
     fontWeight: 'bold',
     marginBottom: 4,
+    color: '#111827',
   },
   address: {
     fontSize: 14,
-    color: '#6b7280',
+    color: '#6B7280',
   },
   surfaceContainer: {
     marginTop: 8,
     paddingTop: 8,
     borderTopWidth: 1,
-    borderTopColor: '#e5e7eb',
+    borderTopColor: '#E5E7EB',
   },
-  surfaceTitle: {
-    fontSize: 13,
+  surfaceText: {
+    fontSize: 12,
     fontWeight: '600',
     color: '#374151',
+  },
+  sportsContainer: {
+    marginTop: 8,
+    paddingTop: 8,
+    paddingBottom: 4,
+    borderTopWidth: 1,
+    borderTopColor: '#E5E7EB',
+  },
+  sportsIcons: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  sportIcon: {
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 });
 

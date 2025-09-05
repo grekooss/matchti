@@ -10,7 +10,9 @@ import React, {
   useState,
 } from 'react';
 import { useBottomSheetStore } from '../lib/zustand/bottomSheetStore';
-import { ActivityIndicator, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { useExploreHeaderHeight } from '../hooks/useExploreHeaderHeight';
+import { ActivityIndicator, StyleSheet, Text, TouchableOpacity, View, Platform, Dimensions } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { FacilityListItemDto } from '../lib/types/api';
 import { Marker } from '../lib/types/map';
 import PopupMap from './maps/PopupMap';
@@ -79,26 +81,40 @@ const FacilityBottomSheetComponent: ForwardRefRenderFunction<
   { facilities, visible, totalCount, onEndReached, isFetchingMore = false },
   ref
 ) => {
-  const [headerHeight, setHeaderHeight] = useState(65); // Domyślna wysokość, można dostosować
+  const insets = useSafeAreaInsets();
+  const screenHeight = Dimensions.get('window').height;
+  const { getExploreHeaderHeightWithBuffer } = useExploreHeaderHeight();
+  
+  // Oblicz wysokość navigation bar (tak samo jak w _layout.tsx)
+  const navigationBarHeight = Platform.OS === 'ios' ? 60 + insets.bottom : 70;
+  
+  // Stała wysokość nad navigation bar (np. 65px)
+  const heightAboveNavBar = 65;
+  const firstSnapPoint = navigationBarHeight + heightAboveNavBar;
 
-  // Definiujemy punkty zatrzymania: pierwszy na wysokość nagłówka, drugi na 100%
-  const snapPoints = useMemo(() => [headerHeight, '100%'], [headerHeight]);
+  // Dynamiczne wyliczenie miejsca dla ExploreHeader za pomocą dedykowanego hooka
+  const headerSpaceAtTop = getExploreHeaderHeightWithBuffer(); // Używa domyślnej wartości (50px) z hooka
+  const secondSnapPoint = screenHeight - headerSpaceAtTop;
 
-  // Callback do mierzenia wysokości nagłówka i ustawiania punktu zatrzymania
-  const handleHeaderLayout = useCallback(
-    (event: { nativeEvent: { layout: { height: number } } }) => {
-      const measuredHeight = event.nativeEvent.layout.height;
-      const handleAreaHeight = 22;
-      // Ustawiamy punkt zatrzymania na wysokość nagłówka + wysokość uchwytu
-      setHeaderHeight(measuredHeight + handleAreaHeight);
-    },
-    []
-  );
+  // Definiujemy punkty zatrzymania: pierwszy na stałą wysokość nad navigation bar, drugi zostawia miejsce dla header
+  const snapPoints = useMemo(() => [firstSnapPoint, secondSnapPoint], [firstSnapPoint, secondSnapPoint]);
+  
+  console.log('📏 BottomSheet dimensions:', {
+    screenHeight,
+    navigationBarHeight,
+    heightAboveNavBar,
+    firstSnapPoint,
+    headerSpaceAtTop,
+    secondSnapPoint,
+    snapPoints
+  });
+
+  // Już nie używamy dynamicznego mierzenia wysokości nagłówka
 
   // Używamy -1 jako indeks początkowy zamiast warunku w JSX
   const [sheetIndex, setSheetIndex] = useState(-1);
   const bottomSheetRef = useRef<BottomSheet>(null);
-  const { setSheetRef, setPopupOpen } = useBottomSheetStore();
+  const { setSheetRef, setBottomSheetExpanded } = useBottomSheetStore();
 
   // Zapisujemy referencję do globalnego store, aby można było sterować BottomSheet z innych komponentów
   useEffect(() => {
@@ -111,16 +127,19 @@ const FacilityBottomSheetComponent: ForwardRefRenderFunction<
   const hasFacilities = facilities.length > 0;
   useEffect(() => {
     const shouldShow = visible && hasFacilities;
+    console.log('🔄 FacilityBottomSheet useEffect:', { visible, hasFacilities, shouldShow, facilitiesLength: facilities.length });
 
     // Używamy setTimeout, aby uniknąć konfliktów renderowania w bibliotece bottom-sheet
     const timer = setTimeout(() => {
       if (shouldShow) {
         // Jeśli markery są widoczne i mamy obiekty, wysuń bottom sheet na pozycję początkową.
         // To się uruchomi tylko przy pierwszym pokazaniu, a nie przy paginacji.
+        console.log('📤 FacilityBottomSheet: Wysuwam na index 0');
         setSheetIndex(0);
         bottomSheetRef.current?.snapToIndex(0);
       } else {
         // Całkowicie ukryj arkusz, jeśli nie ma obiektów lub markery są niewidoczne
+        console.log('📥 FacilityBottomSheet: Ukrywam bottom sheet');
         setSheetIndex(-1);
         bottomSheetRef.current?.close();
       }
@@ -131,14 +150,14 @@ const FacilityBottomSheetComponent: ForwardRefRenderFunction<
 
   // Bezpieczna funkcja do zmiany indeksu arkusza - nie używa wartości Reanimated w fazie renderowania
   const handleSheetChanges = useCallback((index: number) => {
-    console.log('FacilityBottomSheet: handleSheetChanges', index);
+    console.log('🚀 FacilityBottomSheet: handleSheetChanges called with index:', index);
     setSheetIndex(index);
     
-    // Update popup state - when bottom sheet is expanded (index > 0), block category selection
+    // Ustaw stan rozwinięcia - gdy index > 0, bottomsheet jest rozwinięty
     const isExpanded = index > 0;
-    setPopupOpen(isExpanded);
-    console.log('🏪 BottomSheet: Setting popup state to:', isExpanded);
-  }, [setPopupOpen]);
+    setBottomSheetExpanded(isExpanded);
+    console.log('🚀 BottomSheet: Setting bottomSheetExpanded to:', isExpanded);
+  }, [setBottomSheetExpanded]);
 
   // Helper functions (reused from FacilityPopup)
   const formatAddress = (street: string | null, city: string | null): string => {
@@ -220,19 +239,19 @@ const FacilityBottomSheetComponent: ForwardRefRenderFunction<
 
     return (
       <TouchableOpacity 
-        style={styles.itemContainer} 
+        style={styles.facilityItem}
         onPress={handlePress}
         activeOpacity={0.7}
       >
         {/* Map on the left */}
-        <View style={styles.mapSection}>
+        <View style={styles.mapContainer}>
           <PopupMap marker={marker} center={[latitude, longitude]} zoom={MAP_ZOOM_LEVEL} />
         </View>
         
         {/* Info on the right */}
-        <View style={styles.infoSection}>
-          <Text style={styles.itemTitle}>{displayName}</Text>
-          <Text style={styles.itemAddress}>{formattedAddress}</Text>
+        <View style={styles.infoContainer}>
+          <Text style={styles.facilityName}>{displayName}</Text>
+          <Text style={styles.facilityAddress}>{formattedAddress}</Text>
           
           {facility.surface_type && (
             <Text style={styles.surfaceType}>{facility.surface_type}</Text>
@@ -240,9 +259,9 @@ const FacilityBottomSheetComponent: ForwardRefRenderFunction<
           
           {/* Sport icons */}
           {sportIcons.length > 0 && (
-            <View style={styles.sportIconsContainer}>
+            <View style={styles.sportsContainer}>
               {sportIcons.map((sport) => (
-                <View key={sport.id} style={styles.sportIconWrapper}>
+                <View key={sport.id} style={styles.sportIconContainer}>
                   <sport.IconComponent width={16} height={16} fill="#374151" />
                 </View>
               ))}
@@ -252,6 +271,8 @@ const FacilityBottomSheetComponent: ForwardRefRenderFunction<
       </TouchableOpacity>
     );
   };
+
+  console.log('🎭 FacilityBottomSheet render:', { visible, hasFacilities, facilitiesLength: facilities.length, snapPoints });
 
   return (
     <BottomSheet
@@ -267,30 +288,49 @@ const FacilityBottomSheetComponent: ForwardRefRenderFunction<
         bottomSheetRef.current = sheet;
       }}
       // Używamy wartości ze stanu zamiast warunku w JSX
-      index={sheetIndex} // -1 oznacza ukryty, 0 to pierwszy punkt (25%)
+      index={visible && hasFacilities ? 0 : -1} // -1 oznacza ukryty, 0 to pierwszy punkt
       snapPoints={snapPoints}
       onChange={handleSheetChanges}
       // Jeśli są markery, nie pozwalamy na zamknięcie bottom sheet
       enablePanDownToClose={!visible || facilities.length === 0}
+      keyboardBehavior="extend"
+      android_keyboardInputMode="adjustResize"
+      topInset={insets.top}
       handleStyle={{
-        backgroundColor: 'white',
+        backgroundColor: '#069494', // primary color
         borderTopLeftRadius: 15,
         borderTopRightRadius: 15,
       }}
+      handleIndicatorStyle={{
+        backgroundColor: 'white',
+        width: 60,
+        height: 6,
+      }}
       style={{
-        zIndex: 1,
+        zIndex: 1000, // Znacznie wyższy zIndex niż ExploreHeader (50), aby go zasłaniał
+        elevation: 1000, // Na Android - wyższa niż ExploreHeader (8)
       }}
       backgroundStyle={{
-        backgroundColor: 'white',
+        backgroundColor: '#069494', // primary color
         borderTopLeftRadius: 15,
         borderTopRightRadius: 15,
       }}
     >
       <View
-        onLayout={handleHeaderLayout}
-        className="border-b border-gray-200 bg-white px-4 pb-4"
+        style={{
+          borderBottomWidth: 1,
+          borderBottomColor: '#069494',
+          backgroundColor: '#069494',
+          paddingHorizontal: 16,
+          paddingBottom: 16,
+        }}
       >
-        <Text className="text-center text-lg font-semibold">
+        <Text style={{
+          textAlign: 'center',
+          fontSize: 18,
+          fontWeight: '600',
+          color: '#ffffff',
+        }}>
           Found objects:{' '}
           {totalCount !== undefined ? totalCount : facilities.length}
         </Text>
@@ -300,20 +340,24 @@ const FacilityBottomSheetComponent: ForwardRefRenderFunction<
         renderItem={renderItem}
         keyExtractor={(item) => 'type' in item ? item.id : item.id}
         showsVerticalScrollIndicator
-        contentContainerStyle={{ backgroundColor: 'white', paddingBottom: 20 }}
+        contentContainerStyle={{ backgroundColor: '#069494', paddingBottom: 20 }}
         onEndReached={onEndReached}
         onEndReachedThreshold={0.5}
         ListFooterComponent={
           isFetchingMore ? (
-            <View className="items-center py-4">
-              <Text className="mb-2 text-gray-500">
+            <View style={{ alignItems: 'center', paddingVertical: 16 }}>
+              <Text style={{ 
+                marginBottom: 8, 
+                color: '#ffffff',
+                fontSize: 14,
+              }}>
                 Loading more objects...
               </Text>
-              <ActivityIndicator size="small" color="#0000ff" />
+              <ActivityIndicator size="small" color="#ffffff" />
             </View>
           ) : facilities.length < (totalCount || 0) ? (
-            <View className="items-center py-4">
-              <Text className="text-gray-500">Scroll down to load more</Text>
+            <View style={{ alignItems: 'center', paddingVertical: 16 }}>
+              <Text style={{ color: '#ffffff', fontSize: 14 }}>Scroll down to load more</Text>
             </View>
           ) : null
         }
@@ -327,34 +371,58 @@ FacilityBottomSheetComponent.displayName = 'FacilityBottomSheet';
 const FacilityBottomSheet = forwardRef(FacilityBottomSheetComponent);
 
 const styles = StyleSheet.create({
-  itemContainer: {
+  adContainer: {
+    backgroundColor: 'white',
+    borderBottomWidth: 1,
+    borderBottomColor: '#069494',
+    padding: 16,
+    marginHorizontal: 8,
+    marginVertical: 8,
+    borderRadius: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+    minHeight: 80,
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
+    borderStyle: 'dashed',
+  },
+  adText: {
+    fontSize: 14,
+    color: '#6B7280',
+    fontStyle: 'italic',
+    textAlign: 'center',
+  },
+  facilityItem: {
     flexDirection: 'row',
     backgroundColor: 'white',
     borderBottomWidth: 1,
-    borderBottomColor: '#e5e7eb',
+    borderBottomColor: '#069494',
     padding: 12,
     gap: 12,
+    marginHorizontal: 8,
+    marginVertical: 4,
+    borderRadius: 8,
   },
-  mapSection: {
+  mapContainer: {
     width: 120,
     height: 100,
     borderRadius: 8,
     overflow: 'hidden',
-    backgroundColor: '#f3f4f6',
+    backgroundColor: '#F3F4F6',
   },
-  infoSection: {
+  infoContainer: {
     flex: 1,
     justifyContent: 'space-between',
   },
-  itemTitle: {
+  facilityName: {
     fontSize: 16,
     fontWeight: '600',
     color: '#111827',
     marginBottom: 4,
   },
-  itemAddress: {
+  facilityAddress: {
     fontSize: 14,
-    color: '#6b7280',
+    color: '#6B7280',
     marginBottom: 6,
   },
   surfaceType: {
@@ -363,36 +431,15 @@ const styles = StyleSheet.create({
     fontWeight: '500',
     marginBottom: 6,
   },
-  sportIconsContainer: {
+  sportsContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
     marginTop: 4,
   },
-  sportIconWrapper: {
+  sportIconContainer: {
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  adContainer: {
-    backgroundColor: '#f8f9fa',
-    borderBottomWidth: 1,
-    borderBottomColor: '#e5e7eb',
-    padding: 16,
-    marginHorizontal: 12,
-    marginVertical: 8,
-    borderRadius: 8,
-    alignItems: 'center',
-    justifyContent: 'center',
-    minHeight: 80,
-    borderWidth: 1,
-    borderColor: '#e5e7eb',
-    borderStyle: 'dashed',
-  },
-  adText: {
-    fontSize: 14,
-    color: '#6b7280',
-    fontStyle: 'italic',
-    textAlign: 'center',
   },
 });
 

@@ -9,6 +9,8 @@ interface BottomSheetState {
   collapseSheet: () => void;
   isPopupOpen: boolean;
   setPopupOpen: (open: boolean) => void;
+  isBottomSheetExpanded: boolean;
+  setBottomSheetExpanded: (expanded: boolean) => void;
 }
 
 export const useBottomSheetStore = create<BottomSheetState>((set, get) => ({
@@ -19,12 +21,18 @@ export const useBottomSheetStore = create<BottomSheetState>((set, get) => ({
     console.log('🏪 Store: setPopupOpen called with:', open);
     set({ isPopupOpen: open });
   },
+  isBottomSheetExpanded: false,
+  setBottomSheetExpanded: (expanded) => {
+    console.log('🏪 Store: setBottomSheetExpanded called with:', expanded);
+    set({ isBottomSheetExpanded: expanded });
+  },
   expandSheet: () => {
     const { sheetRef } = get();
     console.log('expandSheet wywołany, sheetRef:', !!sheetRef, 'current:', !!sheetRef?.current);
     
     if (!sheetRef?.current) {
-      console.error('Nie można rozwinąć BottomSheet - referencja jest pusta');
+      // Silently ignore if BottomSheet is not available - this can happen during navigation
+      console.log('BottomSheet referencja jest pusta - pomijam rozwijanie');
       return;
     }
     
@@ -51,7 +59,8 @@ export const useBottomSheetStore = create<BottomSheetState>((set, get) => ({
     console.log('collapseSheet wywołany, sheetRef:', !!sheetRef, 'current:', !!sheetRef?.current);
     
     if (!sheetRef?.current) {
-      console.error('Nie można zwinąć BottomSheet - referencja jest pusta');
+      // Silently ignore if BottomSheet is not available - this can happen during navigation
+      console.log('BottomSheet referencja jest pusta - pomijam zwijanie');
       return;
     }
     

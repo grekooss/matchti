@@ -125,7 +125,6 @@ export const useFacilitiesQuery = (
       // Zwracamy nowy offset dla następnej strony
       return lastPage.offset + lastPage.items.length;
     },
-    keepPreviousData: true, // Keep previous data while fetching new data for a smoother UX
     enabled: options?.enabled !== undefined ? options.enabled : true, // Domyślnie włączone
   });
 };

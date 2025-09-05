@@ -6,8 +6,9 @@ import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect } from 'react';
 import 'react-native-reanimated';
-import '../global.css'
 import * as NavigationBar from 'expo-navigation-bar';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 // Utwórz QueryClient
 const queryClient = new QueryClient({
@@ -67,12 +68,16 @@ export default function RootLayout() {
 
 function RootLayoutNav() {
   return (
-    <QueryClientProvider client={queryClient}>
-      <ThemeProvider value={DefaultTheme}>
-        <Stack>
-          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        </Stack>
-      </ThemeProvider>
-    </QueryClientProvider>
+    <SafeAreaProvider>
+      <GestureHandlerRootView style={{ flex: 1 }}>
+        <QueryClientProvider client={queryClient}>
+          <ThemeProvider value={DefaultTheme}>
+            <Stack>
+              <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+            </Stack>
+          </ThemeProvider>
+        </QueryClientProvider>
+      </GestureHandlerRootView>
+    </SafeAreaProvider>
   );
 }

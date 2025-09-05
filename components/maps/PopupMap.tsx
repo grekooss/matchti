@@ -177,10 +177,10 @@ export default function PopupMap({ marker, center, zoom, mapType = 'satellite' }
           
           // Główny polygon obiektu
           var polygon = L.polygon(wayPoints, {
-            color: '#C474F6',
+            color: '#069494',
             weight: currentLayer === satelliteLayer ? 0 : 2,
             opacity: currentLayer === satelliteLayer ? 0 : 0.8,
-            fillColor: '#C474F6',
+            fillColor: '#069494',
             fillOpacity: currentLayer === satelliteLayer ? 0 : 0.35
           }).addTo(map);
           ` : ''}
@@ -193,7 +193,7 @@ export default function PopupMap({ marker, center, zoom, mapType = 'satellite' }
     <View style={styles.container} pointerEvents="none">
       <WebView
         ref={webViewRef}
-        style={styles.map}
+        style={styles.webview}
         source={{ html: mapHTML }}
         scrollEnabled={false}
         pointerEvents="none"
@@ -206,4 +206,8 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
+  webview: {
+    flex: 1,
+  },
 });
+

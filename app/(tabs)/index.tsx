@@ -1,6 +1,5 @@
-import "../../global.css";
 import React, { useState } from "react";
-import { View } from "react-native";
+import { StyleSheet, View } from "react-native";
 import FallbackMap from "@/components/maps/FallbackMap";
 import type { Marker, MapBounds } from "@/lib/types/map";
  
@@ -48,7 +47,7 @@ export default function HomeScreen() {
   };
 
   return (
-    <View className="flex-1 bg-background">
+    <View style={styles.container}>
       <FallbackMap
         markers={sampleMarkers}
         onBoundsChange={handleBoundsChange}
@@ -59,3 +58,11 @@ export default function HomeScreen() {
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#F8F9FA',
+    // Padding dla reklamy Google jest już uwzględniony w _layout.tsx
+  },
+});

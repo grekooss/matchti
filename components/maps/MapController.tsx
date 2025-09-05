@@ -32,7 +32,7 @@ interface MapControllerHandle {
 const MapController = forwardRef<MapControllerHandle, MapControllerProps>(
   ({ onFacilitiesChange }, ref) => {
     const { activeCategory } = useCategoryStore();
-    const { setSheetRef, setPopupOpen } = useBottomSheetStore();
+    const { setSheetRef, setPopupOpen, isBottomSheetExpanded } = useBottomSheetStore();
     const [currentMapBounds, setCurrentMapBounds] = useState<
       MapBounds | undefined
     >(undefined);
@@ -378,7 +378,7 @@ const MapController = forwardRef<MapControllerHandle, MapControllerProps>(
             center: INITIAL_CENTER,
             zoom: 14,
           }}
-          isPopupOpen={!!selectedFacility}
+          isPopupOpen={!!selectedFacility || isBottomSheetExpanded}
           restoreMapState={savedMapState}
         />
 

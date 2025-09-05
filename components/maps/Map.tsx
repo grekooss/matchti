@@ -4,6 +4,7 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { StyleSheet, TouchableOpacity, View } from 'react-native';
 import { WebView } from 'react-native-webview';
 import type { Marker, MapBounds } from '../../lib/types/map';
+import { useExploreHeaderHeight } from '../../hooks/useExploreHeaderHeight';
 
 interface MapProps {
   markers: Marker[];
@@ -21,54 +22,6 @@ interface MapProps {
   } | null;
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  map: {
-    flex: 1,
-    borderRadius: 20, // Zaokrąglenie rogów, aby pasowały do kontenera
-    overflow: 'hidden', // Przycięcie zawartości WebView do zaokrąglonych rogów
-  },
-  mapTypeButton: {
-    position: 'absolute',
-    top: 150, // Przesunięte w dół, żeby było poniżej ExploreHeader
-    right: 10,
-    backgroundColor: 'white',
-    padding: 10,
-    borderRadius: 5,
-    elevation: 3,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-    zIndex: 1000,
-  },
-  locationButton: {
-    position: 'absolute',
-    top: 150, // Przesunięte w dół, żeby było poniżej ExploreHeader
-    left: 10,
-    backgroundColor: 'white',
-    padding: 10,
-    borderRadius: 5,
-    elevation: 3,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-    zIndex: 1000,
-  },
-  blockingOverlay: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    backgroundColor: 'rgba(255, 255, 255, 0.01)', // Almost transparent but still "there"
-    zIndex: 1000, // Above everything
-  },
-});
-
 export default function Map({
   markers,
   onBoundsChange,
@@ -84,6 +37,7 @@ export default function Map({
   );
   const [locationPermission, setLocationPermission] = useState(false);
   const [webViewLoaded, setWebViewLoaded] = useState(false);
+  const { exploreHeaderHeight } = useExploreHeaderHeight();
 
   useEffect(() => {
     checkLocationPermission();
@@ -191,20 +145,17 @@ export default function Map({
           .current-location {
             width: 20px;
             height: 20px;
-            background-color: #069494;
+            background-color: #4a90e2;
             border: 2px solid white;
             border-radius: 50%;
-            box-shadow: 0 0 0 8px rgba(6, 148, 148, 0.2),
-                        0 0 0 16px rgba(6, 148, 148, 0.1),
-                        0 0 0 24px rgba(6, 148, 148, 0.05);
           }
           @keyframes pulse {
             0% {
               transform: scale(1);
-              opacity: 0.8;
+              opacity: 1;
             }
             100% {
-              transform: scale(2.5);
+              transform: scale(3);
               opacity: 0;
             }
           }
@@ -213,7 +164,7 @@ export default function Map({
             width: 20px;
             height: 20px;
             border-radius: 50%;
-            background-color: rgba(6, 148, 148, 0.25);
+            background-color: rgba(74, 144, 226, 0.3);
             animation: pulse 2s ease-out infinite;
           }
           .marker-cluster {
@@ -375,12 +326,12 @@ export default function Map({
                   window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'debug_wayPoints', id: marker.id }));
                   // Sprawdzamy typ mapy, aby dostosowaæ styl polygonu
                   const mapTypeStyle = {
-                    // Zawsze używamy koloru primary-60 dla obrysu
-                    color: '#C474F6',
+                    // Używamy koloru primary dla obrysu
+                    color: '#069494',
                     weight: 2,
                     opacity: 0.8,
                     // Dla widoku satelitarnego wyłączamy wypełnienie
-                    fillColor: '#C474F6',
+                    fillColor: '#069494',
                     fillOpacity: currentLayer === satelliteLayer ? 0 : 0.35
                   };
                   
@@ -640,7 +591,7 @@ export default function Map({
     <View style={styles.container}>
       <WebView
         ref={webViewRef}
-        style={styles.map}
+        style={styles.webView}
         source={{ html: mapHTML }}
         scrollEnabled={!isPopupOpen}
         onMessage={handleMessage}
@@ -656,7 +607,7 @@ export default function Map({
         <>
           {console.log('🛡️ Rendering blocking overlay')}
           <View 
-            style={styles.blockingOverlay} 
+            style={styles.overlay}
             pointerEvents="auto"
             onTouchStart={() => console.log('🤚 Overlay touched!')}
           />
@@ -664,7 +615,7 @@ export default function Map({
       )}
       
       <TouchableOpacity 
-        style={styles.locationButton} 
+        style={[styles.leftButton, { top: exploreHeaderHeight + 10 }]}
         onPress={updateLocation}
         disabled={isPopupOpen}
         activeOpacity={0.7}
@@ -672,7 +623,7 @@ export default function Map({
         <Ionicons name="locate" size={24} color="black" />
       </TouchableOpacity>
       <TouchableOpacity
-        style={styles.mapTypeButton}
+        style={[styles.rightButton, { top: exploreHeaderHeight + 10 }]}
         disabled={isPopupOpen}
         activeOpacity={0.7}
         onPress={() => {
@@ -691,3 +642,47 @@ export default function Map({
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
+  webView: {
+    flex: 1,
+    borderRadius: 20,
+    overflow: 'hidden',
+  },
+  overlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    zIndex: 999,
+    backgroundColor: 'transparent',
+  },
+  leftButton: {
+    position: 'absolute',
+    left: 10,
+    backgroundColor: 'white',
+    padding: 10,
+    borderRadius: 5,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
+  },
+  rightButton: {
+    position: 'absolute',
+    right: 10,
+    backgroundColor: 'white',
+    padding: 10,
+    borderRadius: 5,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
+  },
+});
