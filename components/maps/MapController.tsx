@@ -22,6 +22,7 @@ interface MapControllerProps {
     facilities: FacilityListItemDto[],
     totalCount?: number
   ) => void;
+  onMapTypeChange?: (mapType: 'carto' | 'standard' | 'satellite') => void;
 }
 
 // Interfejs dla metod eksportowanych przez referencję
@@ -30,7 +31,7 @@ interface MapControllerHandle {
 }
 
 const MapController = forwardRef<MapControllerHandle, MapControllerProps>(
-  ({ onFacilitiesChange }, ref) => {
+  ({ onFacilitiesChange, onMapTypeChange }, ref) => {
     const { activeCategory } = useCategoryStore();
     const { setSheetRef, setPopupOpen, isBottomSheetExpanded } = useBottomSheetStore();
     const [currentMapBounds, setCurrentMapBounds] = useState<
@@ -374,6 +375,7 @@ const MapController = forwardRef<MapControllerHandle, MapControllerProps>(
           onBoundsChange={handleBoundsChange}
           onMapStateChange={handleMapStateChange}
           onMarkerPress={handleMarkerPress}
+          onMapTypeChange={onMapTypeChange}
           initialState={{
             center: INITIAL_CENTER,
             zoom: 14,

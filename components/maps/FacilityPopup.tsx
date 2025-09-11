@@ -9,23 +9,8 @@ import { useBottomSheetStore } from '../../lib/zustand/bottomSheetStore';
 import { useExploreHeaderHeight } from '../../hooks/useExploreHeaderHeight';
 import PopupMap from './PopupMap';
 
-// Sport icons imports
-import BadmintonIcon from '../../assets/icons/categories/badminton.svg';
-import BasketballIcon from '../../assets/icons/categories/basketball.svg';
-import BeachVolleyballIcon from '../../assets/icons/categories/beach_volleyball.svg';
-import BeachSoccerIcon from '../../assets/icons/categories/beachsoccer.svg';
-import FutsalIcon from '../../assets/icons/categories/futsal.svg';
-import HandballIcon from '../../assets/icons/categories/handball.svg';
-import PadelIcon from '../../assets/icons/categories/padel.svg';
-import PannaIcon from '../../assets/icons/categories/panna.svg';
-import SimpleSquareIcon from '../../assets/icons/categories/simple_square.svg';
-import SoccerIcon from '../../assets/icons/categories/soccer.svg';
-import SquashIcon from '../../assets/icons/categories/squash.svg';
-import StreetballIcon from '../../assets/icons/categories/streetball.svg';
-import TableTennisIcon from '../../assets/icons/categories/table_tennis.svg';
-import TennisIcon from '../../assets/icons/categories/tennis.svg';
-import TeqballIcon from '../../assets/icons/categories/teqball.svg';
-import VolleyballIcon from '../../assets/icons/categories/volleyball.svg';
+// Import centralnego systemu zarządzania ikonami sportów
+import { getSportIcons } from '../../lib/constants/sportIcons';
 
 interface FacilityPopupProps {
   facility: FacilityListItemDto;
@@ -37,29 +22,6 @@ const POPUP_CLOSE_DELAY = 300; // Delay before expanding bottom sheet after popu
 const MAP_ZOOM_LEVEL = 18;
 const MAX_SPORT_ICONS = 8; // Maximum number of sport icons to show
 
-// Sport icons map - mapping sport names to their icons
-const sportIconMap: Record<string, React.FC<React.SVGProps<SVGSVGElement>>> = {
-  basketball: BasketballIcon,
-  soccer: SoccerIcon,
-  'football': SoccerIcon, // Alternative name for soccer
-  tennis: TennisIcon,
-  volleyball: VolleyballIcon,
-  futsal: FutsalIcon,
-  handball: HandballIcon,
-  padel: PadelIcon,
-  'table tennis': TableTennisIcon,
-  'table_tennis': TableTennisIcon,
-  badminton: BadmintonIcon,
-  squash: SquashIcon,
-  'beach volleyball': BeachVolleyballIcon,
-  'beach_volleyball': BeachVolleyballIcon,
-  'beach soccer': BeachSoccerIcon,
-  'beach_soccer': BeachSoccerIcon,
-  beachsoccer: BeachSoccerIcon,
-  streetball: StreetballIcon,
-  panna: PannaIcon,
-  teqball: TeqballIcon,
-};
 
 const FacilityPopup = ({ facility, onClose }: FacilityPopupProps) => {
   // Get expandSheet and collapseSheet functions to manage BottomSheet
@@ -125,23 +87,8 @@ const FacilityPopup = ({ facility, onClose }: FacilityPopupProps) => {
   // TODO: Add place_name to database and API when facility_google table is created
   const displayName = facility.name || facility.place_name || 'Obiekt sportowy';
 
-  // Get sport icons for this facility
-  const getSportIcons = () => {
-    const sports = facility.supported_sports || [];
-    return sports
-      .slice(0, MAX_SPORT_ICONS) // Limit to MAX_SPORT_ICONS
-      .map(sport => {
-        const sportKey = sport.name.toLowerCase().replace(/\s+/g, '_');
-        const IconComponent = sportIconMap[sportKey] || sportIconMap[sport.name.toLowerCase()] || SimpleSquareIcon;
-        return {
-          id: sport.id,
-          name: sport.name,
-          IconComponent
-        };
-      });
-  };
-
-  const sportIcons = getSportIcons();
+  // Pobierz ikony sportów dla tego obiektu
+  const sportIcons = getSportIcons(facility.supported_sports || [], MAX_SPORT_ICONS);
 
   // Memoize marker object to prevent unnecessary re-renders
   const marker: Marker = useMemo(() => ({
@@ -244,7 +191,12 @@ const FacilityPopup = ({ facility, onClose }: FacilityPopupProps) => {
                   <View style={styles.sportsIcons}>
                     {sportIcons.map((sport) => (
                       <View key={sport.id} style={styles.sportIcon}>
-                        <sport.IconComponent width={20} height={20} fill="#374151" />
+                        <sport.IconComponent 
+                          width={20} 
+                          height={20} 
+                          stroke="#374151" 
+                          color="#374151"
+                        />
                       </View>
                     ))}
                   </View>

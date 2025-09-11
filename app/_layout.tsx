@@ -74,6 +74,7 @@ function RootLayoutNav() {
           <ThemeProvider value={DefaultTheme}>
             <Stack>
               <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+              <Stack.Screen name="facility/[id]" options={{ headerShown: false }} />
             </Stack>
           </ThemeProvider>
         </QueryClientProvider>

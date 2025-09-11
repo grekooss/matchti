@@ -1,7 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import * as Location from 'expo-location';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { StyleSheet, TouchableOpacity, View } from 'react-native';
+import { StyleSheet, TouchableOpacity, View, Text } from 'react-native';
 import { WebView } from 'react-native-webview';
 import type { Marker, MapBounds } from '../../lib/types/map';
 import { useExploreHeaderHeight } from '../../hooks/useExploreHeaderHeight';
@@ -11,6 +11,7 @@ interface MapProps {
   onBoundsChange?: (bounds: MapBounds) => void;
   onMapStateChange?: (state: any) => void;
   onMarkerPress?: (marker: Marker) => void;
+  onMapTypeChange?: (mapType: 'carto' | 'standard' | 'satellite') => void;
   initialState: {
     center: [number, number];
     zoom: number;
@@ -27,6 +28,7 @@ export default function Map({
   onBoundsChange,
   onMapStateChange,
   onMarkerPress,
+  onMapTypeChange,
   initialState,
   isPopupOpen = false,
   restoreMapState,
@@ -41,7 +43,14 @@ export default function Map({
 
   useEffect(() => {
     checkLocationPermission();
+    // Informuj rodzica o początkowym typie mapy
+    onMapTypeChange?.(mapType);
   }, []);
+
+  // Informuj rodzica o zmianie typu mapy
+  useEffect(() => {
+    onMapTypeChange?.(mapType);
+  }, [mapType, onMapTypeChange]);
 
   // Effect to restore map state when popup closes
   useEffect(() => {
@@ -194,22 +203,8 @@ export default function Map({
             color: #888 !important;
           }
           .leaflet-control-attribution {
-            /* Override Leaflet's default positioning */
-            position: absolute !important;
-            top: 5px !important;
-            left: 50% !important;
-            bottom: auto !important;
-            right: auto !important;
-            transform: translateX(-50%);
-            
-            /* Custom styles */
-            background-color: rgba(255, 255, 255, 0.7) !important;
-            padding: 2px 5px !important;
-            border-radius: 3px !important;
-            font-size: 10px !important;
-            z-index: 1000 !important;
-            white-space: nowrap;
-            margin: 0 !important;
+            /* Hide default Leaflet attribution - using custom React Native component */
+            display: none !important;
           }
         </style>
       </head>
@@ -551,6 +546,7 @@ export default function Map({
   const changeMapType = (type: 'carto' | 'standard' | 'satellite') => {
     setMapType(type);
     webViewRef.current?.injectJavaScript(`changeMapType('${type}')`);
+    onMapTypeChange?.(type); // Informuj rodzica o zmianie typu mapy
   };
 
   const handleMessage = (event: any) => {
@@ -639,6 +635,32 @@ export default function Map({
       >
         <Ionicons name="map-outline" size={24} color="black" />
       </TouchableOpacity>
+      
+      {/* Attribution text */}
+      <View 
+        style={[
+          styles.attributionContainer, 
+          { 
+            top: exploreHeaderHeight + (mapType === 'satellite' ? 80 : mapType === 'standard' ? 135 : 153),
+            width: mapType === 'satellite' ? 50 : mapType === 'standard' ? 200 : 240,
+            height: 20,
+            right: mapType === 'satellite' ? -5 : mapType === 'standard' ? -80 : -100
+          }
+        ]}
+        pointerEvents="none"
+      >
+        <Text style={[
+          styles.attributionText,
+          {
+            width: mapType === 'satellite' ? 50 : mapType === 'standard' ? 160 : 195,
+            height: 20
+          }
+        ]}>
+          {mapType === 'standard' ? '© OpenStreetMap contributors' :
+           mapType === 'satellite' ? '© Esri' :
+           '© OpenStreetMap contributors, CARTO'}
+        </Text>
+      </View>
     </View>
   );
 }
@@ -684,5 +706,31 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.25,
     shadowRadius: 3.84,
     elevation: 5,
+  },
+  attributionContainer: {
+    position: 'absolute',
+    right: 5,
+    alignItems: 'center',
+    justifyContent: 'center',
+    zIndex: 1000,
+    elevation: 10,
+  },
+  attributionText: {
+    backgroundColor: 'white',
+    paddingHorizontal: 6,
+    paddingVertical: 3,
+    borderRadius: 4,
+    fontSize: 10,
+    color: 'black',
+    textAlign: 'center',
+    fontWeight: '400',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.15,
+    shadowRadius: 2,
+    elevation: 3,
+    position: 'absolute',
+    transform: [{ rotate: '90deg' }],
+    transformOrigin: 'center center',
   },
 });

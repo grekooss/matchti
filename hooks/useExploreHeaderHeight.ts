@@ -20,7 +20,7 @@ export const useExploreHeaderHeight = () => {
    * Zwraca wysokość ExploreHeader z opcjonalnym buforem (odstępem)
    * @param buffer - dodatkowy odstęp w pikselach (domyślnie -10px)
    */
-  const getExploreHeaderHeightWithBuffer = (buffer: number = -10) => {
+  const getExploreHeaderHeightWithBuffer = (buffer: number = -70) => {
     return exploreHeaderHeight + buffer;
   };
   
@@ -28,7 +28,7 @@ export const useExploreHeaderHeight = () => {
    * Zwraca pozycję dla Popup nad navigationTab z opcjonalnym buforem
    * @param buffer - dodatkowy odstęp w pikselach nad navigationTab (domyślnie 20px)
    */
-  const getPopupBottomPosition = (buffer: number = -40) => {
+  const getPopupBottomPosition = (buffer: number = 10) => {
     // Wysokość navigation bar (tak samo jak w _layout.tsx i FacilityBottomSheet)
     // iOS: 60 + insets.bottom, Android: 70
     const navigationBarHeight = Platform.OS === 'ios' ? 60 + insets.bottom : 70;

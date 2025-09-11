@@ -17,23 +17,8 @@ import { FacilityListItemDto } from '../lib/types/api';
 import { Marker } from '../lib/types/map';
 import PopupMap from './maps/PopupMap';
 
-// Sport icons imports (reuse from FacilityPopup)
-import BasketballIcon from '../assets/icons/categories/basketball.svg';
-import SoccerIcon from '../assets/icons/categories/soccer.svg';
-import TennisIcon from '../assets/icons/categories/tennis.svg';
-import VolleyballIcon from '../assets/icons/categories/volleyball.svg';
-import FutsalIcon from '../assets/icons/categories/futsal.svg';
-import HandballIcon from '../assets/icons/categories/handball.svg';
-import PadelIcon from '../assets/icons/categories/padel.svg';
-import TableTennisIcon from '../assets/icons/categories/table_tennis.svg';
-import BadmintonIcon from '../assets/icons/categories/badminton.svg';
-import SquashIcon from '../assets/icons/categories/squash.svg';
-import BeachVolleyballIcon from '../assets/icons/categories/beach_volleyball.svg';
-import BeachSoccerIcon from '../assets/icons/categories/beachsoccer.svg';
-import StreetballIcon from '../assets/icons/categories/streetball.svg';
-import PannaIcon from '../assets/icons/categories/panna.svg';
-import TeqballIcon from '../assets/icons/categories/teqball.svg';
-import SimpleSquareIcon from '../assets/icons/categories/simple_square.svg';
+// Import centralnego systemu zarządzania ikonami sportów
+import { getSportIcons } from '../lib/constants/sportIcons';
 
 // Wyłączenie ostrzeżeń Reanimated dla tego komponentu
 console.disableYellowBox = true;
@@ -42,29 +27,6 @@ console.disableYellowBox = true;
 const MAP_ZOOM_LEVEL = 17;
 const MAX_SPORT_ICONS = 4;
 
-// Sport icons map - mapping sport names to their icons
-const sportIconMap: Record<string, React.FC<React.SVGProps<SVGSVGElement>>> = {
-  basketball: BasketballIcon,
-  soccer: SoccerIcon,
-  'football': SoccerIcon,
-  tennis: TennisIcon,
-  volleyball: VolleyballIcon,
-  futsal: FutsalIcon,
-  handball: HandballIcon,
-  padel: PadelIcon,
-  'table tennis': TableTennisIcon,
-  'table_tennis': TableTennisIcon,
-  badminton: BadmintonIcon,
-  squash: SquashIcon,
-  'beach volleyball': BeachVolleyballIcon,
-  'beach_volleyball': BeachVolleyballIcon,
-  'beach soccer': BeachSoccerIcon,
-  'beach_soccer': BeachSoccerIcon,
-  beachsoccer: BeachSoccerIcon,
-  streetball: StreetballIcon,
-  panna: PannaIcon,
-  teqball: TeqballIcon,
-};
 
 interface FacilityBottomSheetProps {
   facilities: FacilityListItemDto[];
@@ -89,7 +51,7 @@ const FacilityBottomSheetComponent: ForwardRefRenderFunction<
   const navigationBarHeight = Platform.OS === 'ios' ? 60 + insets.bottom : 70;
   
   // Stała wysokość nad navigation bar (np. 65px)
-  const heightAboveNavBar = 65;
+  const heightAboveNavBar = 118;
   const firstSnapPoint = navigationBarHeight + heightAboveNavBar;
 
   // Dynamiczne wyliczenie miejsca dla ExploreHeader za pomocą dedykowanego hooka
@@ -114,7 +76,7 @@ const FacilityBottomSheetComponent: ForwardRefRenderFunction<
   // Używamy -1 jako indeks początkowy zamiast warunku w JSX
   const [sheetIndex, setSheetIndex] = useState(-1);
   const bottomSheetRef = useRef<BottomSheet>(null);
-  const { setSheetRef, setBottomSheetExpanded } = useBottomSheetStore();
+  const { setSheetRef, setBottomSheetExpanded, setBottomSheetIndex } = useBottomSheetStore();
 
   // Zapisujemy referencję do globalnego store, aby można było sterować BottomSheet z innych komponentów
   useEffect(() => {
@@ -152,12 +114,13 @@ const FacilityBottomSheetComponent: ForwardRefRenderFunction<
   const handleSheetChanges = useCallback((index: number) => {
     console.log('🚀 FacilityBottomSheet: handleSheetChanges called with index:', index);
     setSheetIndex(index);
+    setBottomSheetIndex(index); // Zapisz do globalnego store
     
     // Ustaw stan rozwinięcia - gdy index > 0, bottomsheet jest rozwinięty
     const isExpanded = index > 0;
     setBottomSheetExpanded(isExpanded);
-    console.log('🚀 BottomSheet: Setting bottomSheetExpanded to:', isExpanded);
-  }, [setBottomSheetExpanded]);
+    console.log('🚀 BottomSheet: Setting bottomSheetExpanded to:', isExpanded, 'index:', index);
+  }, [setBottomSheetExpanded, setBottomSheetIndex]);
 
   // Helper functions (reused from FacilityPopup)
   const formatAddress = (street: string | null, city: string | null): string => {
@@ -171,23 +134,14 @@ const FacilityBottomSheetComponent: ForwardRefRenderFunction<
     return 'Brak adresu';
   };
 
-  const getSportIcons = (sports: any[]) => {
-    return sports
-      .slice(0, MAX_SPORT_ICONS)
-      .map(sport => {
-        const sportKey = sport.name.toLowerCase().replace(/\s+/g, '_');
-        const IconComponent = sportIconMap[sportKey] || sportIconMap[sport.name.toLowerCase()] || SimpleSquareIcon;
-        return {
-          id: sport.id,
-          name: sport.name,
-          IconComponent
-        };
-      });
+  // Funkcja pomocnicza do pobierania ikon sportów (wykorzystuje centralny system)
+  const getFacilitySportIcons = (sports: any[]) => {
+    return getSportIcons(sports, MAX_SPORT_ICONS);
   };
 
   // Create mixed data with ads every third item
   const mixedData = useMemo(() => {
-    const result: Array<FacilityListItemDto | { type: 'ad'; id: string }> = [];
+    const result: (FacilityListItemDto | { type: 'ad'; id: string })[] = [];
     
     facilities.forEach((facility, index) => {
       result.push(facility);
@@ -200,6 +154,15 @@ const FacilityBottomSheetComponent: ForwardRefRenderFunction<
         });
       }
     });
+    
+    // If we have facilities but no ads were added (less than 3 facilities),
+    // add an ad at the end
+    if (facilities.length > 0 && facilities.length < 3) {
+      result.push({
+        type: 'ad',
+        id: `ad-end`,
+      });
+    }
     
     return result;
   }, [facilities]);
@@ -220,7 +183,7 @@ const FacilityBottomSheetComponent: ForwardRefRenderFunction<
     const longitude = facility.location.coordinates[0];
     const formattedAddress = formatAddress(facility.addr_street, facility.addr_city);
     const displayName = facility.name || facility.place_name || 'Obiekt sportowy';
-    const sportIcons = getSportIcons(facility.supported_sports || []);
+    const sportIcons = getFacilitySportIcons(facility.supported_sports || []);
 
     const marker: Marker = {
       id: facility.id,
@@ -262,7 +225,12 @@ const FacilityBottomSheetComponent: ForwardRefRenderFunction<
             <View style={styles.sportsContainer}>
               {sportIcons.map((sport) => (
                 <View key={sport.id} style={styles.sportIconContainer}>
-                  <sport.IconComponent width={16} height={16} fill="#374151" />
+                  <sport.IconComponent 
+                    width={16} 
+                    height={16} 
+                    stroke="#374151" 
+                    color="#374151"
+                  />
                 </View>
               ))}
             </View>

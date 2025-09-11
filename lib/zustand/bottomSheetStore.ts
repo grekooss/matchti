@@ -11,6 +11,8 @@ interface BottomSheetState {
   setPopupOpen: (open: boolean) => void;
   isBottomSheetExpanded: boolean;
   setBottomSheetExpanded: (expanded: boolean) => void;
+  bottomSheetIndex: number;
+  setBottomSheetIndex: (index: number) => void;
 }
 
 export const useBottomSheetStore = create<BottomSheetState>((set, get) => ({
@@ -25,6 +27,11 @@ export const useBottomSheetStore = create<BottomSheetState>((set, get) => ({
   setBottomSheetExpanded: (expanded) => {
     console.log('🏪 Store: setBottomSheetExpanded called with:', expanded);
     set({ isBottomSheetExpanded: expanded });
+  },
+  bottomSheetIndex: -1,
+  setBottomSheetIndex: (index) => {
+    console.log('🏪 Store: setBottomSheetIndex called with:', index);
+    set({ bottomSheetIndex: index });
   },
   expandSheet: () => {
     const { sheetRef } = get();

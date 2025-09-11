@@ -8,11 +8,13 @@ import MapController from '../../components/maps/MapController';
 import type { FacilityListItemDto } from '../../lib/types/api';
 import type { Marker } from '../../lib/types/map';
 import { useCategoryStore } from '../../lib/zustand/categoryStore';
+import { useBottomSheetStore } from '../../lib/zustand/bottomSheetStore';
 
 // Centrum mapy jest ustawiane w komponencie MapController
 
 const IndexScreen = () => {
   const { activeCategory } = useCategoryStore();
+  const { isBottomSheetExpanded, bottomSheetIndex } = useBottomSheetStore();
   // Granice mapy są zarządzane przez MapController
   const mapControllerRef = useRef<{ loadMoreFacilities?: () => void }>({});
   const bottomSheetRef = useRef<BottomSheet>(null);
@@ -26,6 +28,7 @@ const IndexScreen = () => {
   const [persistentFacilities, setPersistentFacilities] = useState<
     FacilityListItemDto[]
   >([]);
+  const [currentMapType, setCurrentMapType] = useState<'carto' | 'standard' | 'satellite'>('carto');
   // Poprzednia kategoria nie jest już potrzebna
 
   // Efekt nie jest już potrzebny, dane będą aktualizowane przez callback
@@ -85,6 +88,9 @@ const IndexScreen = () => {
                 setTotalCount(total);
               }
             }}
+            onMapTypeChange={(mapType) => {
+              setCurrentMapType(mapType);
+            }}
           />
         </View>
 
@@ -106,6 +112,7 @@ const IndexScreen = () => {
           }}
           isFetchingMore={false}
         />
+
       </View>
     </View>
   );
