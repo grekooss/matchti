@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   StyleSheet,
   Text,
@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   Image,
   SafeAreaView,
+  Alert,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
@@ -20,6 +21,10 @@ import {
 // Import centralnego systemu zarządzania ikonami sportów
 import { getSportIcon } from '@/lib/constants/sportIcons';
 import ScreenHeader from '@/components/common/ScreenHeader';
+import { useAuth } from '@/lib/hooks/useAuth';
+import { useRouter } from 'expo-router';
+import AuthCard from '@/components/auth/AuthCard';
+import { useNavigationBarHiding } from '@/hooks/useNavigationBarHiding';
 
 // Mock dane użytkownika - w rzeczywistej aplikacji pochodziłyby z Supabase
 const mockUser = {
@@ -109,10 +114,20 @@ const StatCard: React.FC<StatCardProps> = ({ label, value, icon }) => (
 );
 
 export default function ProfileScreen() {
+  // Hook do automatycznego ukrywania paska nawigacyjnego
+  useNavigationBarHiding();
+  
   const insets = useSafeAreaInsets();
+  const router = useRouter();
+  const { user, signOut, isAuthenticated, isLoading } = useAuth();
+  const [showAuthCard, setShowAuthCard] = useState(false);
   
   // Oblicz dynamiczną wysokość nagłówka: insets.top + padding + marginTop + height nagłówka
   const headerHeight = insets.top + 4 + 4 + 60 
+
+  const handleLoginPress = () => {
+    setShowAuthCard(true);
+  };
 
   const handleEditProfile = () => console.log('Edytuj profil');
   const handlePersonalInfo = () => console.log('Informacje osobiste');
@@ -125,7 +140,29 @@ export default function ProfileScreen() {
   const handleSettings = () => console.log('Ustawienia');
   const handleHelp = () => console.log('Pomoc');
   const handleAbout = () => console.log('O aplikacji');
-  const handleLogout = () => console.log('Wyloguj się');
+  const handleLogout = () => {
+    Alert.alert(
+      'Wyloguj się',
+      'Czy na pewno chcesz się wylogować?',
+      [
+        {
+          text: 'Anuluj',
+          style: 'cancel',
+        },
+        {
+          text: 'Wyloguj',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              await signOut();
+            } catch (error) {
+              Alert.alert('Błąd', 'Wystąpił problem podczas wylogowywania');
+            }
+          },
+        },
+      ]
+    );
+  };
 
   const renderFavoriteSports = () => {
     return mockUser.favoritesSports.slice(0, 3).map((sportKey, index) => {
@@ -152,6 +189,33 @@ export default function ProfileScreen() {
         iconName="person"
       />
       <ScrollView style={[styles.scrollView, { paddingTop: headerHeight }]} showsVerticalScrollIndicator={false}>
+        {!isAuthenticated ? (
+          /* Content dla niezalogowanego użytkownika */
+          <View style={styles.unauthenticatedContainer}>
+            <View style={styles.emptyStateContainer}>
+              <View style={styles.emptyStateIconContainer}>
+                <Ionicons name="person-outline" size={48} color="#9CA3AF" />
+              </View>
+              <Text style={styles.emptyStateTitle}>
+                Zaloguj się, aby zobaczyć swój profil
+              </Text>
+              <Text style={styles.emptyStateSubtitle}>
+                Dostęp do profilu, statystyk i ustawień wymaga zalogowania
+              </Text>
+              <TouchableOpacity 
+                style={styles.loginButton} 
+                onPress={handleLoginPress}
+                activeOpacity={0.8}
+              >
+                <Text style={styles.loginButtonText}>
+                  Zaloguj się
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        ) : (
+          /* Content dla zalogowanego użytkownika */
+          <>
         {/* Header z awatarem */}
         <View style={styles.header}>
           <View style={styles.avatarSection}>
@@ -170,12 +234,14 @@ export default function ProfileScreen() {
             
             <View style={styles.userInfo}>
               <View style={styles.nameContainer}>
-                <Text style={styles.userName}>{mockUser.name}</Text>
-                {mockUser.verified && (
+                <Text style={styles.userName}>
+                  {user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'Użytkownik'}
+                </Text>
+                {user?.email_confirmed_at && (
                   <MaterialIcons name="verified" size={16} color="#069494" />
                 )}
               </View>
-              <Text style={styles.userEmail}>{mockUser.email}</Text>
+              <Text style={styles.userEmail}>{user?.email || 'Brak adresu email'}</Text>
               
               <View style={styles.locationContainer}>
                 <Ionicons name="location-outline" size={12} color="#6B7280" />
@@ -327,6 +393,8 @@ export default function ProfileScreen() {
 
         {/* Bottom padding dla tab bar i reklamy */}
         <View style={styles.bottomPadding} />
+          </>
+        )}
       </ScrollView>
     </SafeAreaView>
   );
@@ -631,5 +699,61 @@ const styles = StyleSheet.create({
   },
   bottomPadding: {
     height: 160, // Zwiększony padding dla tab bar i reklamy - lepsze przewijanie
+  },
+  // Styles dla niezalogowanego użytkownika
+  unauthenticatedContainer: {
+    flex: 1,
+    justifyContent: 'flex-start',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingTop: 20, // Stały offset od nagłówka - zawsze w tym samym miejscu
+  },
+  emptyStateContainer: {
+    alignItems: 'center',
+    paddingVertical: 40,
+  },
+  emptyStateIconContainer: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    backgroundColor: '#F3F4F6',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 24,
+  },
+  emptyStateTitle: {
+    fontSize: 18,
+    fontWeight: '500',
+    color: '#1F2937',
+    fontFamily: 'Inter',
+    textAlign: 'center',
+    marginBottom: 8,
+    lineHeight: 24,
+  },
+  emptyStateSubtitle: {
+    fontSize: 14,
+    color: '#6B7280',
+    fontFamily: 'Inter',
+    textAlign: 'center',
+    marginBottom: 32,
+    lineHeight: 20,
+    paddingHorizontal: 16,
+  },
+  loginButton: {
+    backgroundColor: '#069494',
+    paddingHorizontal: 32,
+    paddingVertical: 14,
+    borderRadius: 12,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  loginButtonText: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontWeight: '600',
+    fontFamily: 'Inter',
   },
 });

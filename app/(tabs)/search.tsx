@@ -9,10 +9,14 @@ import type { FacilityListItemDto } from '../../lib/types/api';
 import type { Marker } from '../../lib/types/map';
 import { useCategoryStore } from '../../lib/zustand/categoryStore';
 import { useBottomSheetStore } from '../../lib/zustand/bottomSheetStore';
+import { useNavigationBarHiding } from '../../hooks/useNavigationBarHiding';
 
 // Centrum mapy jest ustawiane w komponencie MapController
 
 const IndexScreen = () => {
+  // Hook do automatycznego ukrywania paska nawigacyjnego
+  useNavigationBarHiding();
+  
   const { activeCategory } = useCategoryStore();
   const { isBottomSheetExpanded, bottomSheetIndex } = useBottomSheetStore();
   // Granice mapy są zarządzane przez MapController

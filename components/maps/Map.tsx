@@ -1,10 +1,39 @@
 import { Ionicons } from '@expo/vector-icons';
-import * as Location from 'expo-location';
+// Warunkowy import Location - dla Expo Go użyjemy fallback
+let Location: any = null;
+try {
+  Location = require('expo-location');
+} catch (error) {
+  console.warn('Location not available - using fallback');
+  // Fallback dla Expo Go
+  Location = {
+    requestForegroundPermissionsAsync: () => Promise.resolve({ status: 'denied' }),
+    getCurrentPositionAsync: () => Promise.resolve({ 
+      coords: { latitude: 52.2297, longitude: 21.0122 } // Warszawa jako fallback
+    }),
+    Accuracy: { Balanced: 4 },
+  };
+}
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { StyleSheet, TouchableOpacity, View, Text } from 'react-native';
-import { WebView } from 'react-native-webview';
+// Warunkowy import WebView - dla Expo Go użyjemy fallback
+let WebView: any = null;
+try {
+  WebView = require('react-native-webview').WebView;
+} catch (error) {
+  console.warn('WebView not available - using fallback component');
+  // Fallback component dla Expo Go
+  WebView = ({ source, style, onMessage }: any) => (
+    <View style={[style, { backgroundColor: '#f0f0f0', justifyContent: 'center', alignItems: 'center' }]}>
+      <Text style={{ color: '#666', textAlign: 'center' }}>
+        Mapa niedostępna w Expo Go.{'\n'}Użyj development build lub emulatora.
+      </Text>
+    </View>
+  );
+}
 import type { Marker, MapBounds } from '../../lib/types/map';
 import { useExploreHeaderHeight } from '../../hooks/useExploreHeaderHeight';
+import { useNavigationBarHiding } from '../../hooks/useNavigationBarHiding';
 
 interface MapProps {
   markers: Marker[];
@@ -33,6 +62,9 @@ export default function Map({
   isPopupOpen = false,
   restoreMapState,
 }: MapProps) {
+  // Hook do automatycznego ukrywania paska nawigacyjnego
+  useNavigationBarHiding();
+  
   const webViewRef = useRef<WebView>(null);
   const [mapType, setMapType] = useState<'carto' | 'standard' | 'satellite'>(
     'carto'

@@ -2,7 +2,11 @@ import React from "react";
 import { StyleSheet, View, Text, ScrollView, TouchableOpacity, SafeAreaView } from "react-native";
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons, MaterialIcons } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
 import ScreenHeader from '@/components/common/ScreenHeader';
+import { useAuth } from '@/lib/hooks/useAuth';
+import { useAuthModalStore } from '@/lib/zustand/authModalStore';
+import { useNavigationBarHiding } from '@/hooks/useNavigationBarHiding';
 
 // Przykładowe spotkania użytkownika
 const userMatches = [
@@ -36,10 +40,20 @@ const userMatches = [
 ];
 
 export default function HomeScreen() {
+  // Hook do automatycznego ukrywania paska nawigacyjnego
+  useNavigationBarHiding();
+  
   const insets = useSafeAreaInsets();
+  const router = useRouter();
+  const { isAuthenticated, isLoading } = useAuth();
+  const { showAuthModal } = useAuthModalStore();
   
   // Oblicz dynamiczną wysokość nagłówka: insets.top + padding + marginTop + height nagłówka
-  const headerHeight = insets.top + 4 + 4 + 60; 
+  const headerHeight = insets.top + 4 + 4 + 60;
+
+  const handleLoginPress = () => {
+    showAuthModal('signin');
+  }; 
 
   return (
     <SafeAreaView style={styles.container}>
@@ -51,10 +65,37 @@ export default function HomeScreen() {
       <ScrollView 
         style={[styles.scrollView, { paddingTop: headerHeight }]} 
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.scrollContent}
       >
-        {/* Statystyki użytkownika */}
-        <View style={styles.statsGrid}>
+        {/* Kondycjonalny content w zależności od autoryzacji */}
+        {!isAuthenticated ? (
+          // Content dla niezalogowanego użytkownika
+          <View style={styles.unauthenticatedContainer}>
+            <View style={styles.emptyStateContainer}>
+              <View style={styles.emptyStateIconContainer}>
+                <Ionicons name="calendar-outline" size={48} color="#9CA3AF" />
+              </View>
+              <Text style={styles.emptyStateTitle}>
+                Zaloguj się, aby zacząć organizować spotkania
+              </Text>
+              <Text style={styles.emptyStateSubtitle}>
+                Dostęp do tworzenia spotkań, zarządzania meczami i znajdowania partnerów wymaga zalogowania
+              </Text>
+              <TouchableOpacity 
+                style={styles.loginButton} 
+                onPress={handleLoginPress}
+                activeOpacity={0.8}
+              >
+                <Text style={styles.loginButtonText}>
+                  Zaloguj się
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        ) : (
+          // Content dla zalogowanego użytkownika
+          <>
+            {/* Statystyki użytkownika */}
+            <View style={styles.statsGrid}>
           <View style={styles.statCard}>
             <View style={styles.statIconContainer}>
               <Ionicons name="calendar" size={20} color="#069494" />
@@ -167,8 +208,10 @@ export default function HomeScreen() {
           </View>
         </View>
 
-        {/* Bottom padding dla tab bar i reklamy */}
-        <View style={styles.bottomPadding} />
+            {/* Bottom padding dla tab bar i reklamy */}
+            <View style={styles.bottomPadding} />
+          </>
+        )}
       </ScrollView>
     </SafeAreaView>
   );
@@ -364,5 +407,61 @@ const styles = StyleSheet.create({
   },
   bottomPadding: {
     height: 200, // Jeszcze większy padding dla komfortowego przewijania
+  },
+  // Styles dla niezalogowanego użytkownika
+  unauthenticatedContainer: {
+    flex: 1,
+    justifyContent: 'flex-start',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingTop: 20, // Stały offset od nagłówka - zawsze w tym samym miejscu
+  },
+  emptyStateContainer: {
+    alignItems: 'center',
+    paddingVertical: 40,
+  },
+  emptyStateIconContainer: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    backgroundColor: '#F3F4F6',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 24,
+  },
+  emptyStateTitle: {
+    fontSize: 18,
+    fontWeight: '500',
+    color: '#1F2937',
+    fontFamily: 'Inter',
+    textAlign: 'center',
+    marginBottom: 8,
+    lineHeight: 24,
+  },
+  emptyStateSubtitle: {
+    fontSize: 14,
+    color: '#6B7280',
+    fontFamily: 'Inter',
+    textAlign: 'center',
+    marginBottom: 32,
+    lineHeight: 20,
+    paddingHorizontal: 16,
+  },
+  loginButton: {
+    backgroundColor: '#069494',
+    paddingHorizontal: 32,
+    paddingVertical: 14,
+    borderRadius: 12,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  loginButtonText: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontWeight: '600',
+    fontFamily: 'Inter',
   },
 });

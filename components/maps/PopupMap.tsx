@@ -1,7 +1,22 @@
 import React, { useMemo, useRef } from 'react';
-import { StyleSheet, View } from 'react-native';
-import { WebView } from 'react-native-webview';
+import { StyleSheet, View, Text } from 'react-native';
 import { Marker } from '../../lib/types/map';
+
+// Warunkowy import WebView - dla Expo Go użyjemy fallback
+let WebView: any = null;
+try {
+  WebView = require('react-native-webview').WebView;
+} catch (error) {
+  console.warn('WebView not available - using fallback component');
+  // Fallback component dla Expo Go
+  WebView = ({ source, style }: any) => (
+    <View style={[style, { backgroundColor: '#f0f0f0', justifyContent: 'center', alignItems: 'center' }]}>
+      <Text style={{ color: '#666', textAlign: 'center' }}>
+        Mapa niedostępna w Expo Go.{'\n'}Użyj development build lub emulatora.
+      </Text>
+    </View>
+  );
+}
 
 interface PopupMapProps {
   marker: Marker;
@@ -11,7 +26,7 @@ interface PopupMapProps {
 }
 
 export default function PopupMap({ marker, center, zoom, mapType = 'satellite' }: PopupMapProps) {
-  const webViewRef = useRef<WebView>(null);
+  const webViewRef = useRef<any>(null);
 
   const mapHTML = useMemo(() => `
     <!DOCTYPE html>

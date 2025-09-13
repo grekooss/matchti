@@ -12,6 +12,7 @@ import type { FacilityListItemDto, GeoJsonPolygon } from '../../lib/types/api';
 import type { MapBounds, Marker } from '../../lib/types/map';
 import { useCategoryStore } from '../../lib/zustand/categoryStore';
 import { useBottomSheetStore } from '../../lib/zustand/bottomSheetStore';
+import { useNavigationBarHiding } from '../../hooks/useNavigationBarHiding';
 import Map from './Map';
 import FacilityPopup from './FacilityPopup';
 
@@ -32,6 +33,9 @@ interface MapControllerHandle {
 
 const MapController = forwardRef<MapControllerHandle, MapControllerProps>(
   ({ onFacilitiesChange, onMapTypeChange }, ref) => {
+    // Hook do automatycznego ukrywania paska nawigacyjnego
+    useNavigationBarHiding();
+    
     const { activeCategory } = useCategoryStore();
     const { setSheetRef, setPopupOpen, isBottomSheetExpanded } = useBottomSheetStore();
     const [currentMapBounds, setCurrentMapBounds] = useState<

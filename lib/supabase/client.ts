@@ -1,32 +1,62 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { createClient } from '@supabase/supabase-js';
 import 'react-native-url-polyfill/auto'; // Potrzebne dla Supabase w React Native
 import { Database } from '../../supabase/database.types'; // Poprawiona ścieżka
+
+// Warunkowy import AsyncStorage - dla Expo Go użyjemy fallback
+let AsyncStorage: any = null;
+try {
+  AsyncStorage = require('@react-native-async-storage/async-storage').default;
+} catch (error) {
+  console.warn('AsyncStorage not available - running in Expo Go. Sessions will not persist.');
+  // Fallback storage dla Expo Go
+  AsyncStorage = {
+    getItem: () => Promise.resolve(null),
+    setItem: () => Promise.resolve(),
+    removeItem: () => Promise.resolve(),
+  };
+}
 
 // Odczytaj zmienne środowiskowe - upewnij się, że są poprawnie skonfigurowane w Twoim projekcie Expo
 const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL;
 const supabaseAnonKey = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY;
 
 if (!supabaseUrl) {
-  throw new Error(
-    'Supabase URL is not defined. Please set EXPO_PUBLIC_SUPABASE_URL in your environment variables.'
-  );
+  console.warn('Supabase URL is not defined. Running in demo mode.');
 }
 
 if (!supabaseAnonKey) {
-  throw new Error(
-    'Supabase Anon Key is not defined. Please set EXPO_PUBLIC_SUPABASE_ANON_KEY in your environment variables.'
-  );
+  console.warn('Supabase Anon Key is not defined. Running in demo mode.');
 }
 
-export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey, {
-  auth: {
-    storage: AsyncStorage,
-    autoRefreshToken: true,
-    persistSession: true,
-    detectSessionInUrl: false,
-  },
-});
+// Jeśli brak konfiguracji Supabase, stwórz mock client
+export const supabase = supabaseUrl && supabaseAnonKey ? 
+  createClient<Database>(supabaseUrl, supabaseAnonKey, {
+    auth: {
+      storage: AsyncStorage,
+      autoRefreshToken: true,
+      persistSession: true,
+      detectSessionInUrl: false,
+    },
+  }) : 
+  // Mock client dla trybu demo
+  {
+    auth: {
+      getSession: () => Promise.resolve({ data: { session: null }, error: null }),
+      signUp: () => Promise.resolve({ data: { user: null, session: null }, error: null }),
+      signInWithPassword: () => Promise.resolve({ data: { user: null, session: null }, error: null }),
+      signOut: () => Promise.resolve({ error: null }),
+      onAuthStateChange: () => ({ data: { subscription: { unsubscribe: () => {} } } }),
+    },
+    from: () => ({
+      select: () => ({ eq: () => ({ single: () => Promise.resolve({ data: null, error: null }) }) }),
+    }),
+    storage: {
+      from: () => ({
+        list: () => Promise.resolve({ data: [], error: null }),
+        getPublicUrl: () => ({ data: { publicUrl: '' } }),
+      }),
+    },
+  } as any;
 
 /**
  * Pobiera publiczne URL-e zdjęć dla danego znacznika (markera) z Supabase Storage.
