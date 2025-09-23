@@ -23,8 +23,9 @@ import { getSportIcon } from '@/lib/constants/sportIcons';
 import ScreenHeader from '@/components/common/ScreenHeader';
 import { useAuth } from '@/lib/hooks/useAuth';
 import { useRouter } from 'expo-router';
-import AuthCard from '@/components/auth/AuthCard';
+import { useAuthModalStore } from '@/lib/zustand/authModalStore';
 import { useNavigationBarHiding } from '@/hooks/useNavigationBarHiding';
+import ChangePasswordModal from '@/components/auth/ChangePasswordModal';
 
 // Mock dane użytkownika - w rzeczywistej aplikacji pochodziłyby z Supabase
 const mockUser = {
@@ -116,23 +117,27 @@ const StatCard: React.FC<StatCardProps> = ({ label, value, icon }) => (
 export default function ProfileScreen() {
   // Hook do automatycznego ukrywania paska nawigacyjnego
   useNavigationBarHiding();
-  
+
   const insets = useSafeAreaInsets();
   const router = useRouter();
   const { user, signOut, isAuthenticated, isLoading } = useAuth();
-  const [showAuthCard, setShowAuthCard] = useState(false);
+  const { showAuthModal } = useAuthModalStore();
+
+  // Stan dla modalu zmiany hasła
+  const [showChangePasswordModal, setShowChangePasswordModal] = useState(false);
   
   // Oblicz dynamiczną wysokość nagłówka: insets.top + padding + marginTop + height nagłówka
   const headerHeight = insets.top + 4 + 4 + 60 
 
   const handleLoginPress = () => {
-    setShowAuthCard(true);
+    showAuthModal('signin');
   };
 
   const handleEditProfile = () => console.log('Edytuj profil');
   const handlePersonalInfo = () => console.log('Informacje osobiste');
   const handleNotifications = () => console.log('Powiadomienia');
   const handlePrivacySettings = () => console.log('Prywatność');
+  const handleChangePassword = () => setShowChangePasswordModal(true);
   const handleSportPreferences = () => console.log('Preferencje sportowe');
   const handleMyMatches = () => console.log('Moje mecze');
   const handleFavorites = () => console.log('Ulubione obiekty');
@@ -317,6 +322,12 @@ export default function ProfileScreen() {
             title="Prywatność"
             subtitle="Bezpieczeństwo konta"
             onPress={handlePrivacySettings}
+          />
+          <MenuItem
+            icon={<Ionicons name="key-outline" size={20} color="#069494" />}
+            title="Ustaw nowe hasło"
+            subtitle="Zmień hasło dostępu"
+            onPress={handleChangePassword}
             isLast={true}
           />
         </MenuSection>
@@ -396,6 +407,12 @@ export default function ProfileScreen() {
           </>
         )}
       </ScrollView>
+
+      {/* Modal zmiany hasła */}
+      <ChangePasswordModal
+        visible={showChangePasswordModal}
+        onClose={() => setShowChangePasswordModal(false)}
+      />
     </SafeAreaView>
   );
 }
@@ -698,7 +715,7 @@ const styles = StyleSheet.create({
     marginLeft: 6,
   },
   bottomPadding: {
-    height: 160, // Zwiększony padding dla tab bar i reklamy - lepsze przewijanie
+    height: 250, // Bardzo duży padding dla bardzo komfortowego przewijania
   },
   // Styles dla niezalogowanego użytkownika
   unauthenticatedContainer: {

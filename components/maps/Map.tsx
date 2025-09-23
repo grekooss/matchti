@@ -152,6 +152,14 @@ export default function Map({
     <html>
       <head>
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta http-equiv="Content-Security-Policy" content="
+          default-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob:;
+          connect-src 'self' https://*.tile.openstreetmap.org https://*.basemaps.cartocdn.com https://server.arcgisonline.com https://unpkg.com;
+          img-src 'self' data: https://*.tile.openstreetmap.org https://*.basemaps.cartocdn.com https://server.arcgisonline.com;
+          script-src 'self' 'unsafe-inline' 'unsafe-eval' https://unpkg.com;
+          style-src 'self' 'unsafe-inline' https://unpkg.com;
+          font-src 'self' data:;
+        ">
         <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
         <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.css" />
         <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.Default.css" />
@@ -627,6 +635,20 @@ export default function Map({
         onLoadEnd={() => {
           console.log('🌐 WebView loaded, setting webViewLoaded to true');
           setWebViewLoaded(true);
+        }}
+        javaScriptEnabled={true}
+        domStorageEnabled={true}
+        allowsFullscreenVideo={false}
+        allowFileAccessFromFileURLs={true}
+        allowUniversalAccessFromFileURLs={true}
+        mixedContentMode="compatibility"
+        onError={(syntheticEvent) => {
+          const { nativeEvent } = syntheticEvent;
+          console.error('WebView error: ', nativeEvent);
+        }}
+        onHttpError={(syntheticEvent) => {
+          const { nativeEvent } = syntheticEvent;
+          console.warn('WebView HTTP error: ', nativeEvent);
         }}
       />
       

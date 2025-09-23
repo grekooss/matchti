@@ -46,8 +46,8 @@ export interface AuthState {
 }
 
 export interface AuthActions {
-  signUp: (data: SignUpData) => Promise<{ error?: string }>;
-  signIn: (data: SignInData) => Promise<{ error?: string }>;
+  signUp: (data: SignUpData) => Promise<{ error?: string; requiresEmailConfirmation?: boolean; email?: string }>;
+  signIn: (data: SignInData) => Promise<{ error?: string; requiresEmailConfirmation?: boolean; email?: string; message?: string }>;
   signInWithGoogle: () => Promise<{ error?: string }>;
   signInWithApple: () => Promise<{ error?: string }>;
   signOut: () => Promise<void>;

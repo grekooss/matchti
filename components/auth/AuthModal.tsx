@@ -15,6 +15,7 @@ import {
 } from 'react-native';
 import Svg, { Path, Defs, LinearGradient, Stop } from 'react-native-svg';
 import { useAuthModalStore } from '@/lib/zustand/authModalStore';
+import { useAuth } from '@/lib/hooks/useAuth';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -57,10 +58,15 @@ const GoogleIcon = ({ size = 20 }) => (
 
 export default function AuthModal() {
   const { isVisible, modalType, hideAuthModal, showAuthModal } = useAuthModalStore();
+  const { signUp, signIn, signInWithGoogle, resetPassword, isLoading, error, clearError } = useAuth();
   const insets = useSafeAreaInsets();
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isKeyboardVisible, setIsKeyboardVisible] = useState(false);
+  const [submitError, setSubmitError] = useState('');
+  const [resetEmailSent, setResetEmailSent] = useState(false);
+  const [emailConfirmationSent, setEmailConfirmationSent] = useState(false);
+  const [confirmationEmail, setConfirmationEmail] = useState('');
 
   // Stany formularza
   const [email, setEmail] = useState('');
@@ -116,10 +122,11 @@ export default function AuthModal() {
     return '';
   };
 
+
   // Obsługa zmian w polach
   const handleEmailChange = (text: string) => {
     setEmail(text);
-    // Walidacja w czasie rzeczywistym - zawsze sprawdzaj gdy email był już wprowadzany
+    // Walidacja formatowania w czasie rzeczywistym
     if (text || emailError) {
       const error = validateEmail(text);
       setEmailError(error);
@@ -167,13 +174,75 @@ export default function AuthModal() {
   };
 
   // Obsługa submitu
-  const handleSubmit = () => {
-    if (validateForm()) {
-      console.log(isSignUp ? 'Zarejestruj się clicked' : 'Zaloguj się clicked', {
-        email,
-        password,
-        ...(isSignUp && { confirmPassword })
-      });
+  const handleSubmit = async () => {
+    if (!validateForm()) {
+      return;
+    }
+
+    setSubmitError('');
+    clearError();
+
+    try {
+      let result;
+
+      if (isSignUp) {
+        result = await signUp({
+          email,
+          password,
+          confirmPassword,
+        });
+      } else {
+        result = await signIn({
+          email,
+          password,
+        });
+      }
+
+      if (result?.error) {
+        setSubmitError(result.error);
+        return;
+      }
+
+      console.log('AuthModal handleSubmit - isSignUp:', isSignUp);
+      console.log('AuthModal handleSubmit - result:', JSON.stringify(result, null, 2));
+
+      // Sprawdź czy rejestracja lub logowanie wymaga potwierdzenia emaila
+      if (result?.requiresEmailConfirmation) {
+        console.log('AuthModal - wykryto potrzebę potwierdzenia emaila podczas:', isSignUp ? 'rejestracji' : 'logowania');
+        setEmailConfirmationSent(true);
+        setConfirmationEmail(result.email || email);
+        return;
+      }
+
+      // Sukces - zamknij modal i wyczyść formularz
+      handleCloseModal();
+    } catch (error) {
+      setSubmitError('Wystąpił nieoczekiwany błąd. Spróbuj ponownie.');
+    }
+  };
+
+  // Obsługa resetowania hasła
+  const handleResetPassword = async () => {
+    const emailErr = validateEmail(email);
+    if (emailErr) {
+      setEmailError(emailErr);
+      return;
+    }
+
+    setSubmitError('');
+    clearError();
+
+    try {
+      const result = await resetPassword({ email });
+
+      if (result?.error) {
+        setSubmitError(result.error);
+        return;
+      }
+
+      setResetEmailSent(true);
+    } catch (error) {
+      setSubmitError('Wystąpił błąd podczas wysyłania emaila resetującego.');
     }
   };
 
@@ -185,8 +254,13 @@ export default function AuthModal() {
     setEmailError('');
     setPasswordError('');
     setConfirmPasswordError('');
+    setSubmitError('');
     setShowPassword(false);
     setShowConfirmPassword(false);
+    setResetEmailSent(false);
+    setEmailConfirmationSent(false);
+    setConfirmationEmail('');
+    clearError();
   };
 
   // Funkcja zamykania modalu z czyszczeniem
@@ -214,6 +288,122 @@ export default function AuthModal() {
   }
 
   const isSignUp = modalType === 'signup';
+  const isResetPassword = modalType === 'reset-password';
+
+
+  // Jeśli email został wysłany, pokaż komunikat potwierdzenia
+  if (resetEmailSent && isResetPassword) {
+    return (
+      <KeyboardAvoidingView
+        style={styles.overlay}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      >
+        <View style={styles.centeredView}>
+          <View style={styles.modalContent}>
+            <View style={styles.contentContainer}>
+            <View style={styles.header}>
+              <Text style={styles.title}>Email wysłany</Text>
+              <TouchableOpacity
+                onPress={handleCloseModal}
+                style={styles.closeButton}
+              >
+                <Ionicons name="close" size={20} color="#6B7280" />
+              </TouchableOpacity>
+            </View>
+
+            <View style={styles.successContainer}>
+              <Ionicons name="checkmark-circle" size={64} color="#059669" />
+              <Text style={styles.successTitle}>Sprawdź swoją skrzynkę pocztową</Text>
+              <Text style={styles.successMessage}>
+                Wysłaliśmy link do resetowania hasła na adres:{'\n'}
+                <Text style={styles.emailHighlight}>{email}</Text>{'\n\n'}
+                Kliknij w link w emailu, aby ustawić nowe hasło.
+              </Text>
+            </View>
+
+            <TouchableOpacity
+              style={styles.loginButton}
+              onPress={handleCloseModal}
+            >
+              <Text style={styles.loginButtonText}>Zamknij</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.registerLink}
+              onPress={() => {
+                setResetEmailSent(false);
+                showAuthModal('signin');
+              }}
+            >
+              <Text style={styles.registerLinkText}>
+                Powrót do <Text style={styles.registerLinkBold}>logowania</Text>
+              </Text>
+            </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </KeyboardAvoidingView>
+    );
+  }
+
+  // Jeśli email potwierdzający został wysłany, pokaż komunikat
+  console.log('AuthModal render - emailConfirmationSent:', emailConfirmationSent, 'isSignUp:', isSignUp, 'modalType:', modalType);
+  if (emailConfirmationSent && (isSignUp || modalType === 'signin')) {
+    return (
+      <KeyboardAvoidingView
+        style={styles.overlay}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      >
+        <View style={styles.centeredView}>
+          <View style={styles.modalContent}>
+            <View style={styles.contentContainer}>
+            <View style={styles.header}>
+              <Text style={styles.title}>Potwierdź swój email</Text>
+              <TouchableOpacity
+                onPress={handleCloseModal}
+                style={styles.closeButton}
+              >
+                <Ionicons name="close" size={20} color="#6B7280" />
+              </TouchableOpacity>
+            </View>
+
+            <View style={styles.successContainer}>
+              <Ionicons name="mail" size={64} color="#069494" />
+              <Text style={styles.successTitle}>Sprawdź swoją skrzynkę pocztową</Text>
+              <Text style={styles.successMessage}>
+                {isSignUp
+                  ? 'Wysłaliśmy link potwierdzający na adres:'
+                  : 'Twój email wymaga potwierdzenia. Wysłaliśmy ponownie link na adres:'
+                }{'\n'}
+                <Text style={styles.emailHighlight}>{confirmationEmail}</Text>{'\n\n'}
+                Kliknij w link w emailu, aby {isSignUp ? 'aktywować swoje konto' : 'potwierdzić email i móc się zalogować'}.
+              </Text>
+            </View>
+
+            <TouchableOpacity
+              style={styles.loginButton}
+              onPress={handleCloseModal}
+            >
+              <Text style={styles.loginButtonText}>Rozumiem</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.registerLink}
+              onPress={() => {
+                setEmailConfirmationSent(false);
+                showAuthModal('signin');
+              }}
+            >
+              <Text style={styles.registerLinkText}>
+                Masz już konto? <Text style={styles.registerLinkBold}>Zaloguj się</Text>
+              </Text>
+            </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </KeyboardAvoidingView>
+    );
+  }
 
   return (
     <KeyboardAvoidingView
@@ -234,7 +424,7 @@ export default function AuthModal() {
             {/* Nagłówek z przyciskiem zamknięcia */}
             <View style={styles.header}>
               <Text style={styles.title}>
-                {isSignUp ? 'Zarejestruj się' : 'Zaloguj się'}
+                {isResetPassword ? 'Resetuj hasło' : isSignUp ? 'Zarejestruj się' : 'Zaloguj się'}
               </Text>
               <TouchableOpacity
                 onPress={handleCloseModal}
@@ -245,7 +435,9 @@ export default function AuthModal() {
             </View>
 
             <Text style={styles.subtitle}>
-              {isSignUp
+              {isResetPassword
+                ? 'Wprowadź swój adres email, a my wyślemy Ci link do resetowania hasła'
+                : isSignUp
                 ? 'Utwórz nowe konto, aby rozpocząć korzystanie z aplikacji'
                 : 'Wprowadź swoje dane, aby uzyskać dostęp do aplikacji'
               }
@@ -272,6 +464,8 @@ export default function AuthModal() {
               {emailError ? <Text style={styles.errorText}>{emailError}</Text> : null}
             </View>
 
+            {/* Wyświetl hasło tylko gdy nie resetujemy hasła */}
+            {!isResetPassword && (
             <View style={styles.formField}>
               <Text style={styles.fieldLabel}>Hasło</Text>
               <View style={styles.passwordContainer}>
@@ -329,8 +523,10 @@ export default function AuthModal() {
                 </View>
               )}
             </View>
+            )}
 
-            {isSignUp && (
+            {/* Potwierdzenie hasła tylko dla rejestracji */}
+            {isSignUp && !isResetPassword && (
               <View style={styles.formField}>
                 <Text style={styles.fieldLabel}>Potwierdź hasło</Text>
                 <View style={styles.passwordContainer}>
@@ -368,51 +564,110 @@ export default function AuthModal() {
               </View>
             )}
 
+            {/* Wyświetlanie błędów */}
+            {(submitError || error) && (
+              <View style={styles.generalErrorContainer}>
+                <Text style={styles.errorText}>
+                  {submitError || error}
+                </Text>
+              </View>
+            )}
+
             {/* Przycisk główny */}
             <TouchableOpacity
-              style={styles.loginButton}
-              onPress={handleSubmit}
+              style={[styles.loginButton, isLoading && styles.loginButtonDisabled]}
+              onPress={isResetPassword ? handleResetPassword : handleSubmit}
+              disabled={isLoading}
             >
               <Text style={styles.loginButtonText}>
-                {isSignUp ? 'Zarejestruj się' : 'Zaloguj się'}
+                {isLoading
+                  ? (isResetPassword ? 'Wysyłanie...' : isSignUp ? 'Rejestracja...' : 'Logowanie...')
+                  : (isResetPassword ? 'Wyślij link resetujący' : isSignUp ? 'Zarejestruj się' : 'Zaloguj się')
+                }
               </Text>
             </TouchableOpacity>
 
-            {/* Separator */}
-            <View style={styles.separator}>
-              <View style={styles.separatorLine} />
-              <Text style={styles.separatorText}>lub</Text>
-              <View style={styles.separatorLine} />
-            </View>
+            {/* Separator i przycisk Google tylko gdy nie resetujemy hasła */}
+            {!isResetPassword && (
+              <>
+                <View style={styles.separator}>
+                  <View style={styles.separatorLine} />
+                  <Text style={styles.separatorText}>lub</Text>
+                  <View style={styles.separatorLine} />
+                </View>
 
-            {/* Przycisk Google */}
-            <TouchableOpacity
-              style={styles.googleButton}
-              onPress={() => console.log('Google ' + (isSignUp ? 'signup' : 'login') + ' clicked')}
+                {/* Przycisk Google */}
+                <TouchableOpacity
+              style={[styles.googleButton, isLoading && styles.googleButtonDisabled]}
+              onPress={async () => {
+                if (isLoading) return;
+
+                setSubmitError('');
+                clearError();
+
+                try {
+                  const result = await signInWithGoogle();
+                  if (result?.error) {
+                    setSubmitError(result.error);
+                    return;
+                  }
+                  // Sukces - zamknij modal
+                  handleCloseModal();
+                } catch (error) {
+                  setSubmitError('Wystąpił błąd podczas logowania przez Google');
+                }
+              }}
+              disabled={isLoading}
             >
               <View style={{ marginRight: 12 }}>
                 <GoogleIcon size={20} />
               </View>
               <Text style={styles.googleButtonText}>
-                {isSignUp ? 'Zarejestruj się przez Google' : 'Zaloguj się przez Google'}
+                {isLoading
+                  ? 'Logowanie...'
+                  : (isSignUp ? 'Zarejestruj się przez Google' : 'Zaloguj się przez Google')
+                }
               </Text>
-            </TouchableOpacity>
+                </TouchableOpacity>
+              </>
+            )}
 
             {/* Link przełączający */}
             <TouchableOpacity
               style={styles.registerLink}
               onPress={() => {
                 clearForm();
-                showAuthModal(isSignUp ? 'signin' : 'signup');
+                if (isResetPassword) {
+                  showAuthModal('signin');
+                } else {
+                  showAuthModal(isSignUp ? 'signin' : 'signup');
+                }
               }}
             >
               <Text style={styles.registerLinkText}>
-                {isSignUp
+                {isResetPassword
+                  ? <>Pamiętasz hasło? <Text style={styles.registerLinkBold}>Zaloguj się</Text></>
+                  : isSignUp
                   ? <>Masz już konto? <Text style={styles.registerLinkBold}>Zaloguj się</Text></>
                   : <>Nie masz konta? <Text style={styles.registerLinkBold}>Zarejestruj się</Text></>
                 }
               </Text>
             </TouchableOpacity>
+
+            {/* Link do resetowania hasła tylko na stronie logowania */}
+            {!isSignUp && !isResetPassword && (
+              <TouchableOpacity
+                style={styles.forgotPasswordLink}
+                onPress={() => {
+                  clearForm();
+                  showAuthModal('reset-password');
+                }}
+              >
+                <Text style={styles.forgotPasswordText}>
+                  Zapomniałeś hasła?
+                </Text>
+              </TouchableOpacity>
+            )}
           </View>
         </View>
       </ScrollView>
@@ -542,6 +797,9 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     textAlign: 'center',
   },
+  loginButtonDisabled: {
+    opacity: 0.6,
+  },
   separator: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -575,6 +833,17 @@ const styles = StyleSheet.create({
     color: '#374151',
     fontSize: 16,
     fontWeight: '500',
+  },
+  googleButtonDisabled: {
+    opacity: 0.6,
+  },
+  generalErrorContainer: {
+    marginBottom: 16,
+    padding: 12,
+    backgroundColor: '#FEF2F2',
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#FECACA',
   },
   registerLink: {
     padding: 8,
@@ -622,5 +891,44 @@ const styles = StyleSheet.create({
   },
   requirementMet: {
     color: '#059669',
+  },
+  // Style dla resetowania hasła
+  centeredView: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  successContainer: {
+    alignItems: 'center',
+    paddingVertical: 32,
+  },
+  successTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#1F2937',
+    marginTop: 16,
+    marginBottom: 12,
+    textAlign: 'center',
+  },
+  successMessage: {
+    fontSize: 16,
+    color: '#6B7280',
+    textAlign: 'center',
+    lineHeight: 24,
+    paddingHorizontal: 4,
+  },
+  emailHighlight: {
+    fontWeight: '600',
+    color: '#069494',
+  },
+  forgotPasswordLink: {
+    padding: 8,
+    marginTop: 8,
+  },
+  forgotPasswordText: {
+    color: '#069494',
+    fontSize: 14,
+    textAlign: 'center',
+    fontWeight: '500',
   },
 });

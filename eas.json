@@ -6,13 +6,49 @@
   "build": {
     "development": {
       "developmentClient": true,
-      "distribution": "internal"
+      "distribution": "internal",
+      "ios": {
+        "resourceClass": "m-medium"
+      },
+      "android": {
+        "resourceClass": "medium"
+      }
     },
     "preview": {
-      "distribution": "internal"
+      "distribution": "internal",
+      "ios": {
+        "resourceClass": "m-medium"
+      },
+      "android": {
+        "resourceClass": "medium"
+      }
     },
     "production": {
-      "autoIncrement": true
+      "autoIncrement": true,
+      "ios": {
+        "resourceClass": "m-medium"
+      },
+      "android": {
+        "resourceClass": "medium",
+        "buildType": "apk"
+      }
+    },
+    "production-aab": {
+      "autoIncrement": true,
+      "ios": {
+        "resourceClass": "m-medium"
+      },
+      "android": {
+        "resourceClass": "medium",
+        "buildType": "app-bundle"
+      }
+    },
+    "apk": {
+      "android": {
+        "resourceClass": "medium",
+        "buildType": "apk",
+        "gradleCommand": ":app:assembleRelease"
+      }
     }
   },
   "submit": {

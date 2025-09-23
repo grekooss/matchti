@@ -36,7 +36,7 @@ export const useAuth = () => {
     isAuthenticated,
     isLoading,
     error,
-    
+
     // Akcje
     signUp,
     signIn,

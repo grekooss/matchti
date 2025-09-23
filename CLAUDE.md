@@ -20,9 +20,20 @@ Jesteś ClaudeCode, ekspertem i asystentem AI dla projektu "Mecz". Twoim zadanie
 -   **Stan Globalny:** Zustand
 -   **Stan Serwera:** TanStack Query
 -   **Formularze:** React Hook Form + Zod
--   **Stylowanie:** NativeWind (Tailwind CSS)
--   **Pamięć Lokalna:** `react-native-mmkv` (dane ogólne), `expo-secure-store` (dane wrażliwe)
--   **Testowanie:** Jest, React Native Testing Library, Detox
+-   **Stylowanie:** React Native StyleSheet (natywne style)
+-   **Nawigacja:** Expo Router (file-based routing)
+-   **Mapy:** React Native Maps + Leaflet WebView (Google Maps + OpenStreetMap)
+-   **UI Components:**
+    -   `@expo/vector-icons` (ikony)
+    -   `@gorhom/bottom-sheet` (bottom sheet)
+    -   `react-native-pager-view` (paginacja)
+    -   `react-native-gesture-handler` (gesty)
+    -   `react-native-reanimated` (animacje)
+    -   `expo-blur` (efekty blur)
+    -   `expo-linear-gradient` (gradienty)
+-   **Pamięć Lokalna:** `@react-native-async-storage/async-storage`, `expo-secure-store` (dane wrażliwe)
+-   **Autentykacja:** Expo Auth Session + Apple Authentication
+-   **Testowanie:** Jest, React Native Testing Library, Detox (E2E)
 -   **Jakość Kodu:** ESLint, Prettier (konfiguracja w repozytorium jest obowiązkowa)
 -   **Logowanie Błędów:** Sentry
 
@@ -50,7 +61,7 @@ Jesteś ClaudeCode, ekspertem i asystentem AI dla projektu "Mecz". Twoim zadanie
 Zawsze przestrzegaj poniższej, kanonicznej struktury katalogów.
 
 ```
-meczujemy/
+matchti/
 ├── app/                  # Ekrany i routing (Expo Router)
 ├── assets/               # Obrazy, fonty, itp.
 ├── components/           # Komponenty UI (szczegóły poniżej)
@@ -62,7 +73,7 @@ meczujemy/
 │   ├── react-query/      # Konfiguracja TanStack Query
 │   ├── zustand/          # Definicje store'ów Zustand
 │   ├── validation/       # Schematy Zod
-│   ├── mmkv/             # Konfiguracja MMKV
+│   ├── storage/          # Konfiguracja AsyncStorage
 │   └── utils/            # Funkcje pomocnicze
 ├── services/             # Logika biznesowa niezwiązana z UI
 └── types/                # Globalne definicje typów TypeScript
@@ -103,23 +114,36 @@ meczujemy/
 ### Nawigacja
 -   Używaj hooków z `expo-router` (np. `useRouter`, `useLocalSearchParams`) do zarządzania nawigacją i parametrami.
 
-### Pamięć Lokalna (MMKV)
--   Używaj `react-native-mmkv` do przechowywania danych niewrażliwych (ustawienia, cache).
+### Pamięć Lokalna (AsyncStorage)
+-   Używaj `@react-native-async-storage/async-storage` do przechowywania danych niewrażliwych (ustawienia, cache).
     ```typescript
-    // Przykład: lib/mmkv/storage.ts
-    import { MMKV } from 'react-native-mmkv';
-    export const storage = new MMKV();
+    // Przykład: lib/storage/asyncStorage.ts
+    import AsyncStorage from '@react-native-async-storage/async-storage';
 
     // Użycie w komponencie
-    storage.set('hasOnboarded', true);
-    const hasOnboarded = storage.getBoolean('hasOnboarded');
+    const storeData = async (key: string, value: string) => {
+      try {
+        await AsyncStorage.setItem(key, value);
+      } catch (e) {
+        console.error('Error storing data:', e);
+      }
+    };
+
+    const getData = async (key: string) => {
+      try {
+        const value = await AsyncStorage.getItem(key);
+        return value;
+      } catch (e) {
+        console.error('Error reading data:', e);
+      }
+    };
     ```
 
 ---
 
 ## 6. Bezpieczeństwo
 
--   **Przechowywanie Wrażliwych Danych:** Tokeny autoryzacyjne, klucze sesji i inne wrażliwe dane **muszą** być przechowywane za pomocą `expo-secure-store`, które wykorzystuje natywne mechanizmy Keychain (iOS) i Keystore (Android). **Nigdy** nie przechowuj ich w MMKV.
+-   **Przechowywanie Wrażliwych Danych:** Tokeny autoryzacyjne, klucze sesji i inne wrażliwe dane **muszą** być przechowywane za pomocą `expo-secure-store`, które wykorzystuje natywne mechanizmy Keychain (iOS) i Keystore (Android). **Nigdy** nie przechowuj ich w AsyncStorage.
 -   **Klucze API:** Klucze API muszą być ładowane ze zmiennych środowiskowych i nie mogą być publicznie dostępne w kodzie frontendu, jeśli nie są to klucze typu `public`.
 -   **Deep Linking:** Zawsze waliduj i sanityzuj parametry otrzymane z deep linków przed ich użyciem w aplikacji, aby zapobiec atakom.
 
@@ -138,12 +162,14 @@ meczujemy/
 ## 8. Testowanie i CI/CD
 
 -   **Pokrycie Kodu:** Dąż do pokrycia kodu testami jednostkowymi na poziomie >80% dla nowej logiki biznesowej (`hooks/`, `lib/`, `services/`).
--   **Mockowanie:** Używaj `jest.mock()` do mockowania natywnych modułów React Native (np. `react-native-mmkv`) oraz zewnętrznych API.
+-   **Mockowanie:** Używaj `jest.mock()` do mockowania natywnych modułów React Native (np. `@react-native-async-storage/async-storage`, `expo-location`) oraz zewnętrznych API.
+-   **Testy E2E:** Używaj Detox do testów end-to-end symulujących rzeczywiste interakcje użytkownika z aplikacją.
 -   **Pipeline CI/CD:** Workflow na GitHub Actions musi zawierać następujące kroki dla każdego Pull Requesta:
     1.  Instalacja zależności (`npm install`).
     2.  Lintowanie i formatowanie (`npm run lint`).
     3.  Uruchomienie testów jednostkowych (`npm test`).
-    4.  Budowanie aplikacji (`npx eas build`).
+    4.  Uruchomienie testów E2E (Detox) - opcjonalnie na wybranych PR-ach.
+    5.  Budowanie aplikacji (`npx eas build`).
 
 ---
 

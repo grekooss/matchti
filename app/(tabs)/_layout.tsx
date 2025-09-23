@@ -237,7 +237,7 @@ export default function TabLayout() {
   return (
     <View style={{ flex: 1 }}>
       <Tabs
-        initialRouteName="search"
+        initialRouteName="index"
         screenOptions={{
           tabBarActiveTintColor: '#069494',
           tabBarInactiveTintColor: '#718096',
@@ -261,14 +261,14 @@ export default function TabLayout() {
           headerShown: false,
         }}>
       <Tabs.Screen
-        name="search"
+        name="index"
         options={{
           tabBarShowLabel: false,
           tabBarIcon: ({ color, focused }) => <IoniconTabBarIcon name="search-outline" color={color} focused={focused} />,
         }}
       />
       <Tabs.Screen
-        name="index"
+        name="matchti"
         options={{
           tabBarShowLabel: false,
           tabBarIcon: ({ color, focused }) => <MatchtiTabBarIcon color={color} focused={focused} />,

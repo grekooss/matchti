@@ -31,6 +31,15 @@ export const useAuthStore = create<AuthStore>()(
           return { error: result.error };
         }
 
+        // Sprawdź czy wymaga potwierdzenia emaila
+        if (result.requiresEmailConfirmation) {
+          set({ isLoading: false });
+          return {
+            requiresEmailConfirmation: true,
+            email: result.email
+          };
+        }
+
         // Jeśli rejestracja się powiodła, zaktualizuj stan
         if (result.data?.user) {
           set({
@@ -43,7 +52,7 @@ export const useAuthStore = create<AuthStore>()(
         }
 
         return {};
-      } catch (error) {
+      } catch {
         const errorMessage = 'Wystąpił nieoczekiwany błąd podczas rejestracji';
         set({ error: errorMessage, isLoading: false });
         return { error: errorMessage };
@@ -52,13 +61,23 @@ export const useAuthStore = create<AuthStore>()(
 
     signIn: async (data: SignInData) => {
       set({ isLoading: true, error: null });
-      
+
       try {
         const result = await authApi.signInWithEmail(data);
 
         if (result.error) {
           set({ error: result.error, isLoading: false });
           return { error: result.error };
+        }
+
+        // Sprawdź czy wymaga potwierdzenia emaila (podczas logowania)
+        if (result.requiresEmailConfirmation) {
+          set({ isLoading: false });
+          return {
+            requiresEmailConfirmation: true,
+            email: result.email,
+            message: result.message
+          };
         }
 
         // Jeśli logowanie się powiodło, zaktualizuj stan
@@ -71,7 +90,7 @@ export const useAuthStore = create<AuthStore>()(
         }
 
         return {};
-      } catch (error) {
+      } catch {
         const errorMessage = 'Wystąpił nieoczekiwany błąd podczas logowania';
         set({ error: errorMessage, isLoading: false });
         return { error: errorMessage };
@@ -92,7 +111,7 @@ export const useAuthStore = create<AuthStore>()(
         // Stan zostanie zaktualizowany przez listener auth state
         set({ isLoading: false });
         return {};
-      } catch (error) {
+      } catch {
         const errorMessage = 'Wystąpił błąd podczas logowania przez Google';
         set({ error: errorMessage, isLoading: false });
         return { error: errorMessage };
@@ -120,7 +139,7 @@ export const useAuthStore = create<AuthStore>()(
         }
 
         return {};
-      } catch (error) {
+      } catch {
         const errorMessage = 'Wystąpił błąd podczas logowania przez Apple';
         set({ error: errorMessage, isLoading: false });
         return { error: errorMessage };
@@ -138,17 +157,17 @@ export const useAuthStore = create<AuthStore>()(
           isAuthenticated: false,
           isLoading: false,
         });
-      } catch (error) {
-        set({ 
+      } catch {
+        set({
           error: 'Wystąpił błąd podczas wylogowywania',
-          isLoading: false 
+          isLoading: false
         });
       }
     },
 
     resetPassword: async (data: ResetPasswordData) => {
       set({ isLoading: true, error: null });
-      
+
       try {
         const result = await authApi.resetPassword(data);
 
@@ -159,12 +178,13 @@ export const useAuthStore = create<AuthStore>()(
 
         set({ isLoading: false });
         return {};
-      } catch (error) {
+      } catch {
         const errorMessage = 'Wystąpił błąd podczas resetowania hasła';
         set({ error: errorMessage, isLoading: false });
         return { error: errorMessage };
       }
     },
+
 
     clearError: () => {
       set({ error: null });
@@ -231,7 +251,7 @@ export const useAuthStore = create<AuthStore>()(
 );
 
 // Listener dla zmian stanu autoryzacji w Supabase
-supabase.auth.onAuthStateChange(async (event, session) => {
+supabase.auth.onAuthStateChange(async (event: string, session: any) => {
   const { checkAuthStatus } = useAuthStore.getState();
   
   console.log('Auth state changed:', event, session?.user?.id);

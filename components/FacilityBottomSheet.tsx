@@ -299,7 +299,7 @@ const FacilityBottomSheetComponent: ForwardRefRenderFunction<
           fontWeight: '600',
           color: '#ffffff',
         }}>
-          Found objects:{' '}
+          Znalezione obiekty:{' '}
           {totalCount !== undefined ? totalCount : facilities.length}
         </Text>
       </View>

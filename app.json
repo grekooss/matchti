@@ -13,7 +13,25 @@
       "backgroundColor": "#ffffff"
     },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.grekoss.matchti",
+      "buildNumber": "1",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false,
+        "CFBundleURLTypes": [
+          {
+            "CFBundleURLName": "matchti-oauth",
+            "CFBundleURLSchemes": ["matchti"]
+          }
+        ],
+        "LSApplicationQueriesSchemes": [
+          "googlegmail",
+          "googleplus"
+        ]
+      },
+      "associatedDomains": [
+        "applinks:matchti.app"
+      ]
     },
     "android": {
       "adaptiveIcon": {
@@ -28,6 +46,7 @@
         "INTERNET",
         "ACCESS_NETWORK_STATE"
       ],
+      "usesCleartextTraffic": true,
       "intentFilters": [
         {
           "action": "VIEW",
@@ -36,6 +55,9 @@
             {
               "scheme": "https",
               "host": "matchti.app"
+            },
+            {
+              "scheme": "matchti"
             }
           ],
           "category": [
@@ -50,6 +72,12 @@
       "output": "static",
       "favicon": "./assets/images/favicon.png"
     },
+    "hooks": {
+      "postPublish": []
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
     "plugins": [
       "expo-router",
       [
@@ -61,7 +89,8 @@
           "backgroundColor": "#ffffff"
         }
       ],
-      "expo-secure-store"
+      "expo-secure-store",
+      "expo-web-browser"
     ],
     "experiments": {
       "typedRoutes": true

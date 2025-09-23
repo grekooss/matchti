@@ -23,6 +23,7 @@ try {
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { AuthModal } from '@/components/auth';
+import { useOAuthHandler } from '@/lib/utils/oauthHandler';
 
 // Utwórz QueryClient
 const queryClient = new QueryClient({
@@ -95,6 +96,13 @@ export default function RootLayout() {
 }
 
 function RootLayoutNav() {
+  const { initializeOAuth } = useOAuthHandler();
+
+  // Inicjalizuj OAuth handler przy starcie aplikacji
+  useEffect(() => {
+    initializeOAuth();
+  }, []);
+
   return (
     <SafeAreaProvider>
       <StatusBar style="auto" />

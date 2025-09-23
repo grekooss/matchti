@@ -3,7 +3,7 @@
  */
 import { create } from 'zustand';
 
-export type AuthModalType = 'signin' | 'signup' | null;
+export type AuthModalType = 'signin' | 'signup' | 'reset-password' | null;
 
 interface AuthModalStore {
   isVisible: boolean;

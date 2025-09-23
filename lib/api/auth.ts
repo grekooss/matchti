@@ -1,25 +1,32 @@
 /**
  * Funkcje API dla systemu autoryzacji
  */
+import { Platform } from 'react-native';
+import type { SignUpData, SignInData, ResetPasswordData } from '../types/auth';
+import type { Session } from '@supabase/supabase-js';
 import { supabase } from '../supabase/client';
+
 // Warunkowy import SecureStore - dla Expo Go użyjemy fallback
 let SecureStore: any = null;
 try {
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
   SecureStore = require('expo-secure-store');
-} catch (error) {
+} catch {
   console.warn('SecureStore not available - using fallback. Sessions will not persist securely.');
   // Fallback dla Expo Go - wykorzysta localStorage/pamięć
   SecureStore = {
-    setItemAsync: (key: string, value: string) => Promise.resolve(),
-    getItemAsync: (key: string) => Promise.resolve(null),
-    deleteItemAsync: (key: string) => Promise.resolve(),
+    setItemAsync: () => Promise.resolve(),
+    getItemAsync: () => Promise.resolve(null),
+    deleteItemAsync: () => Promise.resolve(),
   };
 }
+
 // Warunkowy import AuthSession - dla Expo Go użyjemy fallback
 let AuthSession: any = null;
 try {
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
   AuthSession = require('expo-auth-session');
-} catch (error) {
+} catch {
   console.warn('AuthSession not available - using fallback');
   AuthSession = {
     makeRedirectUri: () => 'exp://localhost:8081',
@@ -29,8 +36,9 @@ try {
 // Warunkowy import AppleAuthentication - dla Expo Go użyjemy fallback
 let AppleAuthentication: any = null;
 try {
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
   AppleAuthentication = require('expo-apple-authentication');
-} catch (error) {
+} catch {
   console.warn('AppleAuthentication not available - using fallback');
   AppleAuthentication = {
     signInAsync: () => Promise.reject(new Error('Apple Authentication not available in Expo Go')),
@@ -41,9 +49,6 @@ try {
     },
   };
 }
-import { Platform } from 'react-native';
-import type { SignUpData, SignInData, ResetPasswordData } from '../types/auth';
-import type { Session } from '@supabase/supabase-js';
 
 // Klucze dla bezpiecznego przechowywania
 const SECURE_STORE_KEYS = {
@@ -57,6 +62,9 @@ const SECURE_STORE_KEYS = {
  */
 export const signUpWithEmail = async ({ email, password }: Omit<SignUpData, 'confirmPassword'>) => {
   try {
+    console.log('signUpWithEmail: próba rejestracji dla', email);
+
+
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
@@ -65,8 +73,47 @@ export const signUpWithEmail = async ({ email, password }: Omit<SignUpData, 'con
       },
     });
 
+    console.log('signUpWithEmail: odpowiedź Supabase - error:', error?.message);
+    console.log('signUpWithEmail: data.user:', data?.user?.id, 'email_confirmed_at:', data?.user?.email_confirmed_at);
+    console.log('signUpWithEmail: data.session:', data?.session ? 'ISTNIEJE' : 'NULL');
+
     if (error) {
+      console.log('signUpWithEmail: błąd rejestracji:', error.message);
+      console.log('signUpWithEmail: pełny błąd:', JSON.stringify(error, null, 2));
+
+      // Sprawdź czy błąd dotyczy już istniejącego emaila
+      const errorMsg = error.message.toLowerCase();
+      if (errorMsg.includes('user already registered') ||
+          errorMsg.includes('already registered') ||
+          errorMsg.includes('already exists') ||
+          errorMsg.includes('email address is already in use') ||
+          errorMsg.includes('email taken') ||
+          errorMsg.includes('duplicate') ||
+          errorMsg.includes('email_already_exists') ||
+          errorMsg.includes('email rate limit exceeded')) {
+        console.log('signUpWithEmail: email już istnieje - blokuję rejestrację');
+        return { error: 'Konto z tym adresem email już istnieje. Przejdź do logowania.' };
+      }
+
+      // Zwróć oryginalny komunikat błędu
       return { error: error.message };
+    }
+
+    // Sprawdź czy email wymaga potwierdzenia
+    // Supabase może tworzyć sesję nawet gdy email nie jest potwierdzony, sprawdź email_confirmed_at
+    if (data.user) {
+      const isEmailConfirmed = data.user.email_confirmed_at !== null && data.user.email_confirmed_at !== undefined;
+      console.log('signUpWithEmail: email_confirmed_at:', data.user.email_confirmed_at);
+      console.log('signUpWithEmail: isEmailConfirmed:', isEmailConfirmed);
+
+      if (!isEmailConfirmed) {
+        console.log('signUpWithEmail: rejestracja pomyślna, ale wymaga potwierdzenia emaila');
+        return {
+          data,
+          requiresEmailConfirmation: true,
+          email: email
+        };
+      }
     }
 
     // Zapisz sesję w bezpiecznym storage
@@ -74,8 +121,10 @@ export const signUpWithEmail = async ({ email, password }: Omit<SignUpData, 'con
       await saveAuthSession(data.session);
     }
 
+    console.log('signUpWithEmail: rejestracja pomyślna');
     return { data };
-  } catch (error) {
+  } catch (unknownError) {
+    console.error('signUpWithEmail: wyjątek:', unknownError);
     return { error: 'Wystąpił nieoczekiwany błąd podczas rejestracji' };
   }
 };
@@ -85,12 +134,35 @@ export const signUpWithEmail = async ({ email, password }: Omit<SignUpData, 'con
  */
 export const signInWithEmail = async ({ email, password }: SignInData) => {
   try {
+    console.log('signInWithEmail: próba logowania dla', email);
+
     const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password,
     });
 
     if (error) {
+      console.log('signInWithEmail: błąd logowania:', error.message);
+
+      // Sprawdź czy błąd dotyczy niepotwierdzoneog emaila
+      if (error.message.includes('Email not confirmed')) {
+        console.log('signInWithEmail: email niepotwierdzony, wysyłanie ponownie emaila potwierdzającego');
+
+        // Spróbuj ponownie wysłać email potwierdzający
+        const resendResult = await resendConfirmationEmail(email);
+
+        if (resendResult.error) {
+          return { error: `Email nie został potwierdzony. ${resendResult.error}` };
+        }
+
+        // Zwróć informację o konieczności potwierdzenia emaila
+        return {
+          requiresEmailConfirmation: true,
+          email: email,
+          message: 'Email nie został potwierdzony. Wysłaliśmy ponownie link potwierdzający.'
+        };
+      }
+
       return { error: error.message };
     }
 
@@ -99,19 +171,33 @@ export const signInWithEmail = async ({ email, password }: SignInData) => {
       await saveAuthSession(data.session);
     }
 
+    console.log('signInWithEmail: logowanie pomyślne');
     return { data };
-  } catch (error) {
+  } catch (unknownError) {
+    console.error('signInWithEmail: wyjątek:', unknownError);
     return { error: 'Wystąpił nieoczekiwany błąd podczas logowania' };
   }
 };
 
 /**
- * Logowanie przez Google
+ * Logowanie przez Google z użyciem OAuth flow
  */
 export const signInWithGoogle = async () => {
   try {
-    const redirectUrl = AuthSession.makeRedirectUri();
-    
+    // Import WebBrowser dla OAuth flow
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const WebBrowser = require('expo-web-browser');
+
+    // Konfiguracja redirect URI
+    // W produkcji używamy custom scheme z app.json - przekierowanie na profil
+    const redirectUrl = AuthSession.makeRedirectUri({
+      scheme: 'matchti', // Musi być zgodne z scheme w app.json
+      path: '(tabs)/profile' // Przekieruj bezpośrednio na stronę profilu
+    });
+
+    console.log('OAuth Redirect URL:', redirectUrl);
+
+    // Rozpocznij OAuth flow z Google przez Supabase
     const { data, error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
@@ -124,11 +210,82 @@ export const signInWithGoogle = async () => {
     });
 
     if (error) {
+      console.error('Supabase OAuth error:', error);
       return { error: error.message };
     }
 
-    return { data };
-  } catch (error) {
+    // Jeśli mamy URL, otwórz go w przeglądarce
+    if (data?.url) {
+      console.log('Opening OAuth URL:', data.url);
+
+      // Skonfiguruj WebBrowser dla lepszej kompatybilności
+      WebBrowser.maybeCompleteAuthSession();
+
+      // Otwórz URL autoryzacji w przeglądarce z odpowiednią konfiguracją
+      const result = await WebBrowser.openAuthSessionAsync(
+        data.url,
+        redirectUrl,
+        {
+          showInRecents: true,
+          createTask: false,
+        }
+      );
+
+      console.log('OAuth result:', result);
+
+      if (result.type === 'success' && result.url) {
+        // Przekaż URL callback do handlera OAuth
+        try {
+          const { OAuthHandler } = await import('../utils/oauthHandler');
+          const handler = OAuthHandler.getInstance();
+
+          if (handler.isOAuthCallback(result.url)) {
+            // Przetwórz callback URL
+            const urlParams = new URL(result.url.replace('#', '?'));
+            const accessToken = urlParams.searchParams.get('access_token');
+            const refreshToken = urlParams.searchParams.get('refresh_token');
+
+            if (accessToken) {
+              // Poczekaj na automatyczne procesowanie przez Supabase
+              await new Promise(resolve => setTimeout(resolve, 1000));
+
+              const { data: sessionData } = await supabase.auth.getSession();
+              if (sessionData?.session) {
+                console.log('OAuth session detected:', sessionData.session.user?.email);
+                await saveAuthSession(sessionData.session);
+                return { data: sessionData };
+              }
+            }
+          }
+        } catch (handlerError) {
+          console.error('OAuth handler error:', handlerError);
+        }
+
+        // Fallback - poczekaj na sesję
+        let attempts = 0;
+        const maxAttempts = 15;
+        while (attempts < maxAttempts) {
+          const { data: sessionData } = await supabase.auth.getSession();
+          if (sessionData?.session) {
+            console.log('OAuth session detected (fallback):', sessionData.session.user?.email);
+            await saveAuthSession(sessionData.session);
+            return { data: sessionData };
+          }
+          await new Promise(resolve => setTimeout(resolve, 500));
+          attempts++;
+        }
+
+        return { error: 'Nie udało się ustanowić sesji po autoryzacji' };
+      } else if (result.type === 'cancel') {
+        return { error: 'Logowanie zostało anulowane' };
+      } else {
+        return { error: 'Logowanie nie powiodło się' };
+      }
+    }
+
+    return { error: 'Nie udało się uzyskać URL autoryzacji' };
+  } catch (unknownError) {
+    console.error('Google OAuth error:', unknownError);
     return { error: 'Wystąpił błąd podczas logowania przez Google' };
   }
 };
@@ -209,7 +366,7 @@ export const signOut = async () => {
 export const resetPassword = async ({ email }: ResetPasswordData) => {
   try {
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${AuthSession.makeRedirectUri()}/auth/reset-password`,
+      redirectTo: `matchti://auth/reset-password`,
     });
 
     if (error) {
@@ -217,9 +374,62 @@ export const resetPassword = async ({ email }: ResetPasswordData) => {
     }
 
     return { success: true };
-  } catch (error) {
+  } catch {
     return { error: 'Wystąpił błąd podczas resetowania hasła' };
   }
+};
+
+/**
+ * Ponowne wysłanie emaila potwierdzającego
+ */
+export const resendConfirmationEmail = async (email: string) => {
+  try {
+    const { error } = await supabase.auth.resend({
+      type: 'signup',
+      email: email,
+      options: {
+        emailRedirectTo: `${AuthSession.makeRedirectUri()}/auth/callback`,
+      },
+    });
+
+    if (error) {
+      console.error('resendConfirmationEmail: błąd:', error.message);
+      return { error: error.message };
+    }
+
+    console.log('resendConfirmationEmail: email wysłany ponownie dla:', email);
+    return { success: true };
+  } catch (unknownError) {
+    console.error('resendConfirmationEmail: wyjątek:', unknownError);
+    return { error: 'Wystąpił błąd podczas wysyłania emaila potwierdzającego' };
+  }
+};
+
+/**
+ * Aktualizacja hasła użytkownika
+ */
+export const updatePassword = async (newPassword: string) => {
+  try {
+    const { error } = await supabase.auth.updateUser({
+      password: newPassword,
+    });
+
+    if (error) {
+      return { error: error.message };
+    }
+
+    return { success: true };
+  } catch {
+    return { error: 'Wystąpił błąd podczas aktualizacji hasła' };
+  }
+};
+
+
+/**
+ * Sprawdzenie czy email to Gmail
+ */
+export const isGmailAccount = (email: string): boolean => {
+  return email.toLowerCase().endsWith('@gmail.com');
 };
 
 /**
@@ -242,8 +452,8 @@ export const getCurrentSession = async () => {
     }
 
     return session;
-  } catch (error) {
-    console.error('Błąd podczas pobierania sesji:', error);
+  } catch (unknownError) {
+    console.error('Błąd podczas pobierania sesji:', unknownError);
     return null;
   }
 };
@@ -265,9 +475,9 @@ export const refreshSession = async () => {
     }
 
     return data.session;
-  } catch (error) {
-    console.error('Błąd podczas odświeżania sesji:', error);
-    throw error;
+  } catch (unknownError) {
+    console.error('Błąd podczas odświeżania sesji:', unknownError);
+    throw unknownError;
   }
 };
 
@@ -279,8 +489,8 @@ const saveAuthSession = async (session: Session) => {
     await SecureStore.setItemAsync(SECURE_STORE_KEYS.ACCESS_TOKEN, session.access_token);
     await SecureStore.setItemAsync(SECURE_STORE_KEYS.REFRESH_TOKEN, session.refresh_token);
     await SecureStore.setItemAsync(SECURE_STORE_KEYS.USER_SESSION, JSON.stringify(session));
-  } catch (error) {
-    console.error('Błąd podczas zapisywania sesji:', error);
+  } catch (unknownError) {
+    console.error('Błąd podczas zapisywania sesji:', unknownError);
   }
 };
 
@@ -294,8 +504,8 @@ export const getStoredAuthSession = async (): Promise<Session | null> => {
       return JSON.parse(sessionData);
     }
     return null;
-  } catch (error) {
-    console.error('Błąd podczas pobierania zapisanej sesji:', error);
+  } catch (unknownError) {
+    console.error('Błąd podczas pobierania zapisanej sesji:', unknownError);
     return null;
   }
 };
@@ -308,7 +518,7 @@ const clearAuthSession = async () => {
     await SecureStore.deleteItemAsync(SECURE_STORE_KEYS.ACCESS_TOKEN);
     await SecureStore.deleteItemAsync(SECURE_STORE_KEYS.REFRESH_TOKEN);
     await SecureStore.deleteItemAsync(SECURE_STORE_KEYS.USER_SESSION);
-  } catch (error) {
-    console.error('Błąd podczas usuwania sesji:', error);
+  } catch (unknownError) {
+    console.error('Błąd podczas usuwania sesji:', unknownError);
   }
 };
